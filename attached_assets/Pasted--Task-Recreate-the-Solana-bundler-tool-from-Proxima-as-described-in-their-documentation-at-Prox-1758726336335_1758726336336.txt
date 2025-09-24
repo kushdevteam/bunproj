@@ -1,0 +1,46 @@
+**Task**: Recreate the Solana bundler tool from Proxima as described in their documentation at [Proxima Tools Documentation](https://docs.proxima.tools/).
+
+**Requirements**:
+
+1. **Front-End**:
+   - Use React for the user interface.
+   - Implement state management using Redux or Context API.
+   - Create components for transaction input, bundling options, and result display.
+   - Use Axios for making API calls to the back-end.
+
+2. **Back-End**:
+   - Set up a Node.js server using Express.
+   - Create routes for handling Solana transactions, bundling, and querying.
+   - Implement middleware for request validation and error handling.
+   - Use Solana Web3.js to interact with the Solana blockchain.
+
+3. **Database**:
+   - Use MongoDB for storing transaction data and bundling results.
+   - Define a schema for transactions and bundling information.
+   - Implement MongoDB queries to retrieve and update data.
+
+4. **Functionality**:
+   - Allow users to input Solana transactions.
+   - Provide options for bundling transactions (e.g., number of transactions per bundle, priority).
+   - Display the results of the bundling process, including transaction status and fees.
+   - Implement error handling and user feedback for successful and failed operations.
+
+5. **Testing**:
+   - Write unit tests for front-end components and back-end routes.
+   - Create integration tests to ensure the front-end and back-end work together.
+   - Implement end-to-end tests to simulate user interactions.
+
+6. **Deployment**:
+   - Containerize the application using Docker.
+   - Set up a CI/CD pipeline for automated testing and deployment.
+   - Deploy the application to a cloud provider like AWS, GCP, or Azure.
+
+7. **Documentation**:
+   - Document the code with comments and docstrings.
+   - Create user documentation and developer guides.
+
+**Deliverables**:
+- A fully functional Solana bundler tool with a user-friendly interface.
+- Source code for the front-end, back-end, and database schema.
+- Test cases and deployment scripts.
+- Comprehensive documentation for users and developers.
