@@ -1,219 +1,208 @@
+use anyhow::Result;
+use parking_lot::RwLock;
+use rand::rngs::OsRng;
 use serde::{Deserialize, Serialize};
+use ed25519_dalek::{Keypair, PublicKey, SecretKey};
 use std::collections::HashMap;
+use std::str::FromStr;
 use std::sync::Arc;
-use tokio::sync::RwLock;
-use tracing::{info, error, warn};
-use rand::Rng;
+use tracing::{info, warn};
+
+use crate::solana_client::SolanaClient;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WalletInfo {
     pub public_key: String,
     pub balance: f64,
     pub created_at: String,
-    pub last_activity: Option<String>,
-    pub derivation_path: Option<String>,
-    pub is_hd_wallet: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WalletBalance {
     pub public_key: String,
     pub balance: f64,
-    pub last_updated: String,
 }
 
-#[derive(Debug, Clone)]
-pub struct WalletData {
-    pub info: WalletInfo,
-    pub private_key: String,
-    pub mnemonic: Option<String>,
+#[derive(Debug, Deserialize)]
+pub struct WalletRequest {
+    pub count: u32,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct FundRequest {
+    pub wallets: Vec<String>,
+    pub amount: f64,
+}
+
+pub struct StoredWallet {
+    pub keypair: Keypair,
+    pub balance: f64,
+    pub created_at: chrono::DateTime<chrono::Utc>,
 }
 
 pub struct WalletManager {
-    pub wallets: Arc<RwLock<HashMap<String, WalletData>>>,
-    pub hd_master_key: Option<String>,
-    pub mnemonic: Option<String>,
+    wallets: Arc<RwLock<HashMap<String, StoredWallet>>>,
+    solana_client: SolanaClient,
 }
 
 impl WalletManager {
-    pub async fn new() -> Result<Self, Box<dyn std::error::Error>> {
+    pub async fn new() -> Result<Self> {
         Ok(Self {
             wallets: Arc::new(RwLock::new(HashMap::new())),
-            hd_master_key: None,
-            mnemonic: None,
+            solana_client: SolanaClient::new(),
         })
     }
 
-    // Generate HD wallet master key (simplified)
-    pub async fn generate_hd_master(&mut self) -> Result<String, Box<dyn std::error::Error>> {
-        let mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about".to_string();
-        self.hd_master_key = Some("master_key_placeholder".to_string());
-        self.mnemonic = Some(mnemonic.clone());
-        Ok(mnemonic)
-    }
-
-    // Generate wallets with advanced features (simulated)
-    pub async fn generate_wallets(
-        &mut self,
-        count: u32,
-        use_hd: bool,
-        custom_derivation_path: Option<String>,
-    ) -> Result<Vec<WalletInfo>, Box<dyn std::error::Error>> {
-        let mut wallet_infos = Vec::new();
-        let mut wallets = self.wallets.write().await;
-
-        // Generate HD master key if needed
-        if use_hd && self.hd_master_key.is_none() {
-            self.generate_hd_master().await?;
+    pub async fn generate_wallets(&self, count: u32) -> Result<Vec<WalletInfo>> {
+        if count == 0 || count > 1000 {
+            return Err(anyhow::anyhow!("Invalid wallet count. Must be between 1 and 1000"));
         }
 
-        for i in 0..count {
-            // Generate simulated Solana-compatible keypair
-            let public_key = self.generate_solana_public_key(i);
-            let private_key = self.generate_solana_private_key(i);
-            let derivation_path = if use_hd {
-                Some(custom_derivation_path.clone().unwrap_or_else(|| format!("m/44'/501'/0'/0/{}", i)))
-            } else {
-                None
+        let mut wallets = Vec::new();
+        let mut wallet_store = self.wallets.write();
+
+        for _ in 0..count {
+            let mut csprng = OsRng {};
+            let keypair = Keypair::generate(&mut csprng);
+            let public_key = bs58::encode(keypair.public.to_bytes()).into_string();
+            let created_at = chrono::Utc::now();
+
+            let stored_wallet = StoredWallet {
+                keypair,
+                balance: 0.0,
+                created_at,
             };
 
             let wallet_info = WalletInfo {
                 public_key: public_key.clone(),
                 balance: 0.0,
-                created_at: chrono::Utc::now().to_rfc3339(),
-                last_activity: None,
-                derivation_path,
-                is_hd_wallet: use_hd,
+                created_at: created_at.to_rfc3339(),
             };
 
-            let wallet_data = WalletData {
-                info: wallet_info.clone(),
-                private_key,
-                mnemonic: self.mnemonic.clone(),
-            };
-
-            wallets.insert(public_key, wallet_data);
-            wallet_infos.push(wallet_info);
+            wallet_store.insert(public_key, stored_wallet);
+            wallets.push(wallet_info);
         }
 
-        info!("🦀 Generated {} wallets with Rust (HD: {})", count, use_hd);
-        Ok(wallet_infos)
+        info!("Generated {} new wallets", count);
+        Ok(wallets)
     }
 
-    // Generate Solana-compatible public key (simulated)
-    fn generate_solana_public_key(&self, index: u32) -> String {
-        let mut hasher = sha2::Sha256::new();
-        use sha2::Digest;
-        hasher.update(format!("solana_pubkey_{}", index));
-        let hash = hasher.finalize();
-        
-        // Convert to base58 like Solana addresses
-        let chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-        (0..44) // Solana addresses are typically 44 characters
-            .map(|i| chars.chars().nth(hash[i % 32] as usize % chars.len()).unwrap())
-            .collect()
-    }
+    pub async fn fund_wallets(&self, wallet_addresses: &[String], amount: f64) -> Result<Vec<WalletInfo>> {
+        if wallet_addresses.is_empty() {
+            return Err(anyhow::anyhow!("No wallet addresses provided"));
+        }
 
-    // Generate Solana-compatible private key (simulated)
-    fn generate_solana_private_key(&self, index: u32) -> String {
-        let mut hasher = sha2::Sha256::new();
-        use sha2::Digest;
-        hasher.update(format!("solana_privkey_{}", index));
-        let hash = hasher.finalize();
-        
-        // Convert to base58
-        let chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-        (0..88) // Private keys are longer
-            .map(|i| chars.chars().nth(hash[i % 32] as usize % chars.len()).unwrap())
-            .collect()
-    }
+        if amount <= 0.0 || amount > 100.0 {
+            return Err(anyhow::anyhow!("Invalid amount. Must be between 0.001 and 100 SOL"));
+        }
 
-    // Fund wallets with advanced strategies
-    pub async fn fund_wallets(
-        &self,
-        wallet_addresses: &[String],
-        amount: f64,
-        use_multiple_sources: bool,
-    ) -> Result<Vec<WalletInfo>, Box<dyn std::error::Error>> {
-        let mut updated_wallets = Vec::new();
-        let mut wallets = self.wallets.write().await;
+        let mut funded_wallets = Vec::new();
+        let lamports = (amount * 1_000_000_000.0) as u64; // Convert SOL to lamports
 
-        for address in wallet_addresses {
-            if let Some(wallet_data) = wallets.get_mut(address) {
-                if use_multiple_sources {
-                    // Simulate funding from multiple sources for stealth
-                    let sources = vec![amount * 0.4, amount * 0.3, amount * 0.3];
-                    let mut total_funded = 0.0;
+        for wallet_address in wallet_addresses {
+            // Request airdrop from devnet faucet
+            match self.solana_client.request_airdrop(wallet_address, lamports).await {
+                Ok(signature) => {
+                    // Wait a moment for the airdrop to be processed
+                    tokio::time::sleep(tokio::time::Duration::from_millis(2000)).await;
                     
-                    for source_amount in sources {
-                        // Add random delay between funding sources
-                        let delay = rand::thread_rng().gen_range(100..500);
-                        tokio::time::sleep(tokio::time::Duration::from_millis(delay)).await;
-                        total_funded += source_amount;
+                    // Get the actual balance from the blockchain
+                    let balance_lamports = self.solana_client.get_balance(wallet_address).await.unwrap_or(0);
+                    let balance_sol = balance_lamports as f64 / 1_000_000_000.0;
+                    
+                    // Update our local record
+                    {
+                        let mut wallet_store = self.wallets.write();
+                        if let Some(stored_wallet) = wallet_store.get_mut(wallet_address) {
+                            stored_wallet.balance = balance_sol;
+                        }
                     }
                     
-                    wallet_data.info.balance = total_funded;
-                } else {
-                    wallet_data.info.balance = amount;
+                    let wallet_info = WalletInfo {
+                        public_key: wallet_address.clone(),
+                        balance: balance_sol,
+                        created_at: chrono::Utc::now().to_rfc3339(),
+                    };
+                    
+                    funded_wallets.push(wallet_info);
+                    info!("✅ Funded wallet {} with {} SOL (signature: {})", 
+                          &wallet_address[..8], amount, &signature[..8]);
+                },
+                Err(e) => {
+                    warn!("❌ Failed to fund wallet {}: {}", &wallet_address[..8], e);
+                    // Add wallet with 0 balance to show the attempt
+                    funded_wallets.push(WalletInfo {
+                        public_key: wallet_address.clone(),
+                        balance: 0.0,
+                        created_at: chrono::Utc::now().to_rfc3339(),
+                    });
                 }
-                
-                wallet_data.info.last_activity = Some(chrono::Utc::now().to_rfc3339());
-                updated_wallets.push(wallet_data.info.clone());
             }
         }
 
-        info!("💰 Funded {} wallets with {:.6} SOL each (Rust)", wallet_addresses.len(), amount);
-        Ok(updated_wallets)
+        info!("Funding completed: {}/{} wallets funded successfully", 
+              funded_wallets.iter().filter(|w| w.balance > 0.0).count(), 
+              wallet_addresses.len());
+        Ok(funded_wallets)
     }
 
-    // Get wallet balances (simulated blockchain query)
-    pub async fn get_balances(&self, addresses: &[String]) -> Result<Vec<WalletBalance>, Box<dyn std::error::Error>> {
+    pub async fn get_balances(&self, wallet_addresses: &[String]) -> Result<Vec<WalletBalance>> {
         let mut balances = Vec::new();
-        let wallets = self.wallets.read().await;
 
-        for address in addresses {
-            if let Some(wallet_data) = wallets.get(address) {
-                balances.push(WalletBalance {
-                    public_key: address.clone(),
-                    balance: wallet_data.info.balance,
-                    last_updated: chrono::Utc::now().to_rfc3339(),
-                });
-            } else {
-                // Simulate querying unknown address
-                balances.push(WalletBalance {
-                    public_key: address.clone(),
-                    balance: rand::random::<f64>() * 0.1, // Random small balance
-                    last_updated: chrono::Utc::now().to_rfc3339(),
-                });
+        for wallet_address in wallet_addresses {
+            // Get actual balance from the Solana blockchain
+            match self.solana_client.get_balance(wallet_address).await {
+                Ok(balance_lamports) => {
+                    let balance_sol = balance_lamports as f64 / 1_000_000_000.0;
+                    
+                    // Update our local cache
+                    {
+                        let mut wallet_store = self.wallets.write();
+                        if let Some(stored_wallet) = wallet_store.get_mut(wallet_address) {
+                            stored_wallet.balance = balance_sol;
+                        }
+                    }
+                    
+                    balances.push(WalletBalance {
+                        public_key: wallet_address.clone(),
+                        balance: balance_sol,
+                    });
+                },
+                Err(e) => {
+                    warn!("Failed to get balance for {}: {}", &wallet_address[..8], e);
+                    balances.push(WalletBalance {
+                        public_key: wallet_address.clone(),
+                        balance: 0.0,
+                    });
+                }
             }
         }
 
         Ok(balances)
     }
 
-    // Export wallet data (without private keys for security)
-    pub async fn export_wallets(&self) -> Vec<WalletInfo> {
-        let wallets = self.wallets.read().await;
-        wallets.values().map(|w| w.info.clone()).collect()
+    pub fn get_keypair(&self, public_key: &str) -> Option<Keypair> {
+        let wallet_store = self.wallets.read();
+        wallet_store.get(public_key).map(|w| {
+            w.keypair.clone()
+        })
     }
 
-    // Get wallet statistics
-    pub async fn get_wallet_stats(&self) -> HashMap<String, serde_json::Value> {
-        let wallets = self.wallets.read().await;
-        let total_wallets = wallets.len();
-        let hd_wallets = wallets.values().filter(|w| w.info.is_hd_wallet).count();
-        let total_balance: f64 = wallets.values().map(|w| w.info.balance).sum();
-        
-        let mut stats = HashMap::new();
-        stats.insert("total_wallets".to_string(), serde_json::Value::Number(total_wallets.into()));
-        stats.insert("hd_wallets".to_string(), serde_json::Value::Number(hd_wallets.into()));
-        stats.insert("total_balance".to_string(), serde_json::Value::Number(
-            serde_json::Number::from_f64(total_balance).unwrap_or_default()
-        ));
-        stats.insert("average_balance".to_string(), serde_json::Value::Number(
-            serde_json::Number::from_f64(if total_wallets > 0 { total_balance / total_wallets as f64 } else { 0.0 }).unwrap_or_default()
-        ));
-        
-        stats
+    pub async fn update_balance(&self, public_key: &str, new_balance: f64) {
+        let mut wallet_store = self.wallets.write();
+        if let Some(stored_wallet) = wallet_store.get_mut(public_key) {
+            stored_wallet.balance = new_balance;
+        }
+    }
+
+    pub fn get_all_wallets(&self) -> Vec<WalletInfo> {
+        let wallet_store = self.wallets.read();
+        wallet_store.iter().map(|(public_key, stored_wallet)| {
+            WalletInfo {
+                public_key: public_key.clone(),
+                balance: stored_wallet.balance,
+                created_at: stored_wallet.created_at.to_rfc3339(),
+            }
+        }).collect()
     }
 }
