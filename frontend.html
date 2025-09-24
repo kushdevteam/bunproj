@@ -712,17 +712,17 @@
 
                 <div class="nav-section">
                     <h3>Features</h3>
-                    <div class="nav-item">
+                    <div class="nav-item" onclick="showAgedWallets()">
                         <i class="fas fa-wallet"></i>
                         <span>Aged Wallets</span>
                         <span class="badge">50</span>
                     </div>
-                    <div class="nav-item">
+                    <div class="nav-item" onclick="showShield()">
                         <i class="fas fa-shield-alt"></i>
                         <span>Shield</span>
                         <span class="status">Unprotected</span>
                     </div>
-                    <div class="nav-item">
+                    <div class="nav-item" onclick="showArchived()">
                         <i class="fas fa-archive"></i>
                         <span>Archived</span>
                         <span class="badge">98</span>
@@ -731,11 +731,11 @@
 
                 <div class="nav-section">
                     <h3>Account</h3>
-                    <div class="nav-item">
+                    <div class="nav-item" onclick="showProfile()">
                         <i class="fas fa-user"></i>
                         <span>Profile</span>
                     </div>
-                    <div class="nav-item">
+                    <div class="nav-item" onclick="showSettings()">
                         <i class="fas fa-cog"></i>
                         <span>Settings</span>
                     </div>
@@ -784,25 +784,6 @@
                 <canvas id="profitChart"></canvas>
             </div>
 
-            <!-- Referral Section -->
-            <div class="referral-section">
-                <div class="referral-card">
-                    <div class="referral-title">Referral</div>
-                    <div class="referral-value" id="users-referred">3</div>
-                    <div class="referral-subtitle">Users Referred</div>
-                </div>
-                <div class="referral-card">
-                    <div class="referral-title"></div>
-                    <div class="referral-value" id="referral-rate">15%</div>
-                    <div class="referral-subtitle">Rate</div>
-                </div>
-                <div class="referral-card">
-                    <div class="referral-title"></div>
-                    <div class="referral-value" id="referral-earned">66.93 SOL</div>
-                    <div class="referral-subtitle">Earned</div>
-                    <button class="claim-btn">Claim - 0.5 SOL</button>
-                </div>
-            </div>
 
             <!-- Bundler Section (Hidden by default) -->
             <div id="bundler-section" class="hidden">
@@ -893,6 +874,271 @@
                             <p>No bundles executed yet. Generate wallets and execute a bundle to see results.</p>
                         </div>
                     </div>
+                </div>
+
+            <!-- Aged Wallets Section (Hidden by default) -->
+            <div id="aged-wallets-section" class="hidden">
+                <header class="page-header">
+                    <h1 class="page-title">Aged Wallets</h1>
+                    <div class="status-indicators">
+                        <div class="status-dot"></div>
+                        <span>50 Wallets Available</span>
+                    </div>
+                </header>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">50</div>
+                        <div class="stat-label">Total Wallets</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value green">45</div>
+                        <div class="stat-label">Ready to Use</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value orange">5</div>
+                        <div class="stat-label">In Use</div>
+                    </div>
+                </div>
+
+                <div class="bundler-card">
+                    <h3><i class="fas fa-wallet"></i> Wallet Management</h3>
+                    <div class="wallets-grid">
+                        <div class="wallet-item">
+                            <div class="wallet-address">7xKXtg2CW87d97TXJsDpKoPbBnux...XRJVJQtyKLn</div>
+                            <div class="wallet-balance">2.4567 SOL</div>
+                        </div>
+                        <div class="wallet-item">
+                            <div class="wallet-address">9mWqo8BsPtdqxKGzc4FpZx89...QWERtyUIpn</div>
+                            <div class="wallet-balance">1.8934 SOL</div>
+                        </div>
+                        <div class="wallet-item">
+                            <div class="wallet-address">4vPzW7RtYuGhXc45FqKPm89...ASdFgHjKl</div>
+                            <div class="wallet-balance">3.1245 SOL</div>
+                        </div>
+                        <div class="wallet-item">
+                            <div class="wallet-address">2rTyU8NmXpWqEf67GhJkL43...ZxCvBnMq</div>
+                            <div class="wallet-balance">0.7892 SOL</div>
+                        </div>
+                        <div class="wallet-item">
+                            <div class="wallet-address">8kLpQ5VtGhYuXw23FrMnE67...QaZxByVt</div>
+                            <div class="wallet-balance">4.5678 SOL</div>
+                        </div>
+                        <div class="wallet-item">
+                            <div class="wallet-address">6nWsR4HgTyUiOp98QaLkM12...ErTyUiPo</div>
+                            <div class="wallet-balance">2.1345 SOL</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shield Section (Hidden by default) -->
+            <div id="shield-section" class="hidden">
+                <header class="page-header">
+                    <h1 class="page-title">Shield Protection</h1>
+                    <div class="status-indicators">
+                        <div class="status-dot" style="background: var(--accent-red);"></div>
+                        <span>Unprotected</span>
+                    </div>
+                </header>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: var(--accent-red);">0</div>
+                        <div class="stat-label">Active Protections</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">Available Shields</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value green">99.9%</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                </div>
+
+                <div class="bundler-card">
+                    <h3><i class="fas fa-shield-alt"></i> Protection Settings</h3>
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Your transactions are currently unprotected. Enable shield for maximum security.</span>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="mev-shield"> MEV Protection
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="sandwich-shield"> Sandwich Attack Protection
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="frontrun-shield"> Front-running Protection
+                        </label>
+                    </div>
+                    <button class="btn-primary">Enable Shield Protection</button>
+                </div>
+            </div>
+
+            <!-- Archived Section (Hidden by default) -->
+            <div id="archived-section" class="hidden">
+                <header class="page-header">
+                    <h1 class="page-title">Archived Tokens</h1>
+                    <div class="status-indicators">
+                        <div class="status-dot"></div>
+                        <span>98 Archived</span>
+                    </div>
+                </header>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">98</div>
+                        <div class="stat-label">Total Archived</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value green">76</div>
+                        <div class="stat-label">Profitable</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: var(--accent-red);">22</div>
+                        <div class="stat-label">Lost Trades</div>
+                    </div>
+                </div>
+
+                <div class="bundler-card">
+                    <h3><i class="fas fa-archive"></i> Archived Tokens</h3>
+                    <div class="transaction-item">
+                        <div class="transaction-header">
+                            <h4>$MEME - MemeCoin Pro</h4>
+                            <span class="transaction-status status-confirmed">+245.6 SOL</span>
+                        </div>
+                        <p><strong>Launch Date:</strong> Sep 15, 2025</p>
+                        <p><strong>Exit Date:</strong> Sep 20, 2025</p>
+                        <p><strong>ROI:</strong> 1,245%</p>
+                    </div>
+                    <div class="transaction-item">
+                        <div class="transaction-header">
+                            <h4>$DOGE2 - Doge Killer</h4>
+                            <span class="transaction-status status-confirmed">+89.3 SOL</span>
+                        </div>
+                        <p><strong>Launch Date:</strong> Sep 10, 2025</p>
+                        <p><strong>Exit Date:</strong> Sep 18, 2025</p>
+                        <p><strong>ROI:</strong> 456%</p>
+                    </div>
+                    <div class="transaction-item">
+                        <div class="transaction-header">
+                            <h4>$MOON - MoonShot</h4>
+                            <span class="transaction-status status-failed">-12.4 SOL</span>
+                        </div>
+                        <p><strong>Launch Date:</strong> Sep 8, 2025</p>
+                        <p><strong>Exit Date:</strong> Sep 12, 2025</p>
+                        <p><strong>ROI:</strong> -24%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Section (Hidden by default) -->
+            <div id="profile-section" class="hidden">
+                <header class="page-header">
+                    <h1 class="page-title">Profile</h1>
+                    <div class="status-indicators">
+                        <div class="status-dot"></div>
+                        <span>Active User</span>
+                    </div>
+                </header>
+                
+                <div class="bundler-grid">
+                    <div class="bundler-card">
+                        <h3><i class="fas fa-user"></i> Account Information</h3>
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" value="SolNoxTrader" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Member Since</label>
+                            <input type="text" value="August 2025" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>API Key</label>
+                            <input type="password" value="sk_live_4a8f9c2d1e3b7g5h..." readonly>
+                        </div>
+                        <button class="btn-secondary">Edit Profile</button>
+                    </div>
+
+                    <div class="bundler-card">
+                        <h3><i class="fas fa-chart-bar"></i> Performance Stats</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: center;">
+                            <div>
+                                <div style="font-size: 24px; font-weight: 700; color: var(--accent-green);">842.2 SOL</div>
+                                <div style="color: var(--text-secondary); font-size: 14px;">Total Profits</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 24px; font-weight: 700;">87</div>
+                                <div style="color: var(--text-secondary); font-size: 14px;">Tokens Launched</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 24px; font-weight: 700; color: var(--accent-green);">89.7%</div>
+                                <div style="color: var(--text-secondary); font-size: 14px;">Success Rate</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 24px; font-weight: 700;">156</div>
+                                <div style="color: var(--text-secondary); font-size: 14px;">Days Active</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section (Hidden by default) -->
+            <div id="settings-section" class="hidden">
+                <header class="page-header">
+                    <h1 class="page-title">Settings</h1>
+                    <div class="status-indicators">
+                        <div class="status-dot"></div>
+                        <span>Configured</span>
+                    </div>
+                </header>
+                
+                <div class="bundler-card">
+                    <h3><i class="fas fa-cog"></i> General Settings</h3>
+                    <div class="form-group">
+                        <label>Default Slippage (%)</label>
+                        <input type="number" value="5" step="0.1" min="0.1" max="50">
+                    </div>
+                    <div class="form-group">
+                        <label>Priority Fee (SOL)</label>
+                        <input type="number" value="0.001" step="0.001" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Default Stagger Delay (ms)</label>
+                        <input type="number" value="100" min="0" max="5000">
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" checked> Enable Stealth Mode by Default
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" checked> Enable MEV Protection
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox"> Enable Email Notifications
+                        </label>
+                    </div>
+                    <button class="btn-primary">Save Settings</button>
+                </div>
+
+                <div class="bundler-card">
+                    <h3><i class="fas fa-network-wired"></i> RPC Settings</h3>
+                    <div class="form-group">
+                        <label>Solana RPC URL</label>
+                        <input type="text" value="https://api.devnet.solana.com" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Network</label>
+                        <select>
+                            <option selected>Devnet</option>
+                            <option>Mainnet</option>
+                        </select>
+                    </div>
+                    <button class="btn-secondary">Update RPC</button>
                 </div>
             </div>
         </main>
@@ -1023,10 +1269,7 @@
         let currentData = {
             tokensLaunched: 87,
             profits: 842.2,
-            lastLaunch: '$XPD',
-            usersReferred: 3,
-            referralRate: 15,
-            referralEarned: 66.93
+            lastLaunch: '$XPD'
         };
 
         let wallets = [];
@@ -1076,9 +1319,6 @@
             document.getElementById('tokens-launched').textContent = data.tokensLaunched || currentData.tokensLaunched;
             document.getElementById('total-profits').textContent = `+${data.profits || currentData.profits} SOL`;
             document.getElementById('last-launch').textContent = data.lastLaunch || currentData.lastLaunch;
-            document.getElementById('users-referred').textContent = data.usersReferred || currentData.usersReferred;
-            document.getElementById('referral-rate').textContent = `${data.referralRate || currentData.referralRate}%`;
-            document.getElementById('referral-earned').textContent = `${data.referralEarned || currentData.referralEarned} SOL`;
         }
 
         function initializeProfitChart() {
@@ -1194,18 +1434,79 @@
         }
 
         // Navigation functions
+        function hideAllSections() {
+            // Hide all main sections
+            const sections = ['bundler-section', 'aged-wallets-section', 'shield-section', 'archived-section', 'profile-section', 'settings-section'];
+            sections.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section) section.classList.add('hidden');
+            });
+            
+            // Hide all statistics content
+            const statsElements = document.querySelectorAll('.stats-grid, .chart-section');
+            statsElements.forEach(el => el.style.display = 'none');
+        }
+
         function showStatistics() {
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             event.target.closest('.nav-item').classList.add('active');
-            document.getElementById('bundler-section').classList.add('hidden');
-            document.querySelector('.main-content > .stats-grid').parentElement.querySelector('.stats-grid').parentElement.style.display = 'block';
+            
+            hideAllSections();
+            
+            // Show statistics content
+            const statsElements = document.querySelectorAll('.stats-grid, .chart-section');
+            statsElements.forEach(el => el.style.display = 'block');
+            
+            // Update page title
+            document.querySelector('.page-title').textContent = 'Statistics';
         }
 
         function showBundler() {
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             event.target.closest('.nav-item').classList.add('active');
-            document.querySelector('.main-content > .stats-grid').parentElement.querySelector('.stats-grid').parentElement.style.display = 'none';
+            
+            hideAllSections();
             document.getElementById('bundler-section').classList.remove('hidden');
+        }
+
+        function showAgedWallets() {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+            
+            hideAllSections();
+            document.getElementById('aged-wallets-section').classList.remove('hidden');
+        }
+
+        function showShield() {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+            
+            hideAllSections();
+            document.getElementById('shield-section').classList.remove('hidden');
+        }
+
+        function showArchived() {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+            
+            hideAllSections();
+            document.getElementById('archived-section').classList.remove('hidden');
+        }
+
+        function showProfile() {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+            
+            hideAllSections();
+            document.getElementById('profile-section').classList.remove('hidden');
+        }
+
+        function showSettings() {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+            
+            hideAllSections();
+            document.getElementById('settings-section').classList.remove('hidden');
         }
 
         // Bundler Functions
