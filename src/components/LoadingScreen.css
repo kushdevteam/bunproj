@@ -1,0 +1,51 @@
+/**
+ * Loading Screen Styles
+ * Full-screen loading overlay with dark theme
+ */
+
+.loading-screen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(4px);
+}
+
+.loading-screen-content {
+  text-align: center;
+  padding: 40px;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top: 3px solid #00D4AA;
+  border-radius: 50%;
+  animation: loading-spin 1s linear infinite;
+  margin: 0 auto 24px;
+}
+
+@keyframes loading-spin {
+  0% { 
+    transform: rotate(0deg); 
+  }
+  100% { 
+    transform: rotate(360deg); 
+  }
+}
+
+.loading-text {
+  color: #FFFFFF;
+  font-size: 16px;
+  font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  opacity: 0.9;
+  letter-spacing: 0.02em;
+}

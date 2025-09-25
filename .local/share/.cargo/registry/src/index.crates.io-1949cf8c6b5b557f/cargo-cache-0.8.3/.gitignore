@@ -1,0 +1,5 @@
+
+/target/
+**/*.rs.bk
+tests/cloudsmith_registry_test/helloworld/target/*
+tests/cloudsmith_registry_test/use_cloudsmith_dep/target/*

@@ -1,0 +1,186 @@
+🔧 Overview
+
+Create a multi-wallet bundler tool for BNB Chain that supports:
+
+Distributing BNB across multiple wallets
+
+Buying a token from each wallet based on custom % allocations
+
+Automating the launch and auto-sell of that token from all wallets
+
+Handling private keys securely in-browser (not storing on server)
+
+Supporting custom bundle configurations, execution preview, and status tracking
+
+🧩 COMPONENTS TO BUILD
+1. Wallet Bundle Manager
+
+Display a list of generated wallets with:
+
+Wallet address (shortened)
+
+Role label (dev, mev, funder, numbered IDs)
+
+BNB balance
+
+Token balance (after buy)
+
+Private key (obscured by default, toggled via eye icon)
+
+Show action buttons:
+
+Buy, Sell, Distribute, etc., per wallet (active only when eligible)
+
+Withdraw BNB from all wallets to main wallet
+
+Add total count & summary row: “X Wallets + Dev | Total BNB: X”
+
+2. Bundle Configuration UI
+
+Form to create a token bundle:
+
+Token contract address (to buy)
+
+BNB amount to spend per wallet
+
+Buy % allocation per wallet (editable)
+
+Priority fee (optional)
+
+Gas price settings
+
+Enable stealth options: Delay (ms), randomized order
+
+Display bundle mode toggles:
+
+Mode: Launch | Buy | Sell | Auto
+
+Filter: Show/hide empty wallets
+
+3. BNB Distribution Flow
+
+From one Funding Wallet, distribute BNB to all listed wallets based on % split
+
+Execute via internal script or smart contract batch tx (if possible)
+
+Add status dots (✅/🟣/⏳) showing which wallets were funded
+
+4. Token Buy / Launch Execution
+
+For each wallet:
+
+Initiate token purchase (using PancakeSwap Router)
+
+Respect % allocation (convert to BNB amount per wallet)
+
+Submit tx via private key (Web3 signTransaction & send)
+
+Support simultaneous or staggered (delay-based) launch
+
+Collect and display results (success/fail per wallet)
+
+Require confirmation modal before batch launch
+
+5. Auto-Sell Planner
+
+Create “Auto Sell” plans per wallet or per bundle:
+
+Conditions: Token reaches X% profit, or Y BNB value
+
+Add plan interface: “Add a new Auto-Sell plan”
+
+Execute via frontend (cron or background polling)
+
+Optional: Trigger via event monitoring (pending)
+
+6. Funding Wallet Summary
+
+Display current balance (e.g. 0 / 55.782 BNB)
+
+Withdraw button to collect remaining BNB from wallets
+
+Address of funding wallet shown above the bundle
+
+7. UI Behavior
+
+Match visual layout closely to the screenshots:
+
+Clean table of wallets with scroll
+
+Role badges (dev, mev, funder)
+
+% Token Buy column
+
+Lock icon next to private key
+
+Allow editing of % allocation directly in the UI (inline pencil icon)
+
+🔐 SECURITY REQUIREMENTS
+
+Private keys must not leave the browser
+
+Transactions must be signed locally using Web3/ethers.js
+
+No centralized storage of wallet keys
+
+Allow import/export of wallet bundles via encrypted local JSON (optional)
+
+🛠 TECH STACK (Recommended)
+
+Frontend: React + Tailwind or Next.js + Styled Components
+
+Wallets: Use ethers.js for signing & sending BNB txs
+
+BNB Chain DEX Integration: PancakeSwap V2/V3 Router for token buys
+
+Private Key Management: Store in localStorage/sessionStorage or in-memory only
+
+Optional Backend: Node.js (only if needed for logs, stats, etc.)
+
+📌 PRIORITY TASK FLOW
+
+✅ Implement wallet table UI with mock wallets and fake data
+
+✅ Add editable token % columns and role tags
+
+✅ Enable BNB distribution from funding wallet
+
+✅ Connect real wallets and BSC testnet
+
+✅ Integrate PancakeSwap token buy with BNB per wallet
+
+✅ Add status indicators (funded / bought / failed)
+
+🔜 Add “Auto Sell” plan logic (based on profit %, time delay, etc.)
+
+🧪 TESTING
+
+Start with BSC Testnet (use test BNB + test tokens)
+
+Provide Distribute, Buy, and Sell buttons per wallet and globally
+
+Use console logs for tx hashes and errors before building final notifications
+
+🧱 EXAMPLE FUNCTIONAL FLOW
+[User adds 20 wallets]
+→ Clicks "Distribute"
+→ Each wallet gets 0.5 BNB
+→ Sets % token buy for each
+→ Clicks "Launch"
+→ Each wallet swaps BNB for target token via PancakeSwap
+→ Buys succeed → Mark with ✅
+→ Add Auto-Sell plan: Sell if token > +40%
+→ Backend monitors prices (or simulate via button for now)
+→ Auto sell triggers sell tx from each wallet
+
+📦 OPTIONAL FUTURE FEATURES
+
+“Save Bundle” and “Restore” saved plans
+
+Auto gas estimator and budget validator
+
+Telegram/Discord alerts on tx completion
+
+Chart view of token profit/loss over time
+
+Let me know if you want this broken down into Trello-style tasks or GitHub issues. I can also generate the PancakeSwap router buy/sell integration code if needed.

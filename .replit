@@ -1,0 +1,69 @@
+modules = ["rust-stable", "c-clang14", "web", "nodejs-20", "python-3.11"]
+
+[nix]
+channel = "stable-25_05"
+packages = ["openssl", "pkg-config"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Rust Backend"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Frontend"
+
+[[workflows.workflow]]
+name = "Rust Backend"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd simple_backend && cargo run"
+waitForPort = 8000
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "Frontend"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm start"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 8000
+externalPort = 8000
+
+[[ports]]
+localPort = 38713
+externalPort = 3000
+
+[[ports]]
+localPort = 40007
+externalPort = 3001
+
+[agent]
+expertMode = true
+
+[deployment]
+deploymentTarget = "vm"
+run = ["bash", "-c", "cd backend && cargo run --release & npm start"]
+build = ["bash", "-c", "cd backend && cargo build --release && npm run build"]

@@ -1,0 +1,12 @@
+[package]
+name = "simple-backend"
+version = "0.1.0"
+edition = "2021"
+
+# Exclude from workspace
+[workspace]
+
+[dependencies]
+# Minimal dependencies for stable HTTP server
+serde_json = "1.0"
+tiny_http = "0.12.0"

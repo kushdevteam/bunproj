@@ -1,0 +1,8 @@
+target
+dist
+site/public/*
+.vscode
+!examples/wasm_threads/.vscode
+.idea/
+.DS_Store
+/vendor

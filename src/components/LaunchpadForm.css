@@ -1,0 +1,340 @@
+/**
+ * LaunchpadForm Component Styles
+ * Exact match to user's dark theme design screenshots
+ */
+
+.launchpad-form {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  padding: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Header Section */
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.form-header h1 {
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.launchpad-badge {
+  background-color: #2d2d2d;
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #404040;
+}
+
+/* Launchpad Section */
+.launchpad-section {
+  margin-bottom: 32px;
+}
+
+.launchpad-section h3 {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.launchpad-option {
+  display: flex;
+  gap: 16px;
+}
+
+.four-option {
+  background-color: #2d2d2d;
+  border: 2px solid #00ff88;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 120px;
+  position: relative;
+}
+
+.four-option.selected {
+  box-shadow: 0 0 0 2px #00ff88;
+}
+
+.four-icon {
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.four-text {
+  font-size: 28px;
+}
+
+.option-label {
+  color: #00ff88;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Form Fields */
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea {
+  background-color: #000000;
+  border: 1px solid #404040;
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #ffffff;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #00ff88;
+  box-shadow: 0 0 0 2px rgba(0, 255, 136, 0.1);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #888888;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.error-text {
+  color: #ff4444;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Image Upload Section */
+.image-upload-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.image-upload-area {
+  border: 2px dashed #404040;
+  border-radius: 12px;
+  padding: 60px 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #000000;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-upload-area:hover,
+.image-upload-area.drag-active {
+  border-color: #00ff88;
+  background-color: rgba(0, 255, 136, 0.05);
+}
+
+.uploaded-image {
+  max-width: 100%;
+  max-height: 120px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.upload-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.upload-icon {
+  font-size: 32px;
+  color: #888888;
+}
+
+.upload-text {
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.upload-text strong {
+  font-weight: 600;
+}
+
+.upload-formats {
+  color: #888888;
+  font-size: 12px;
+}
+
+/* Preview Panel */
+.preview-panel {
+  background-color: #2d2d2d;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #404040;
+}
+
+.preview-panel h4 {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.preview-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.preview-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.preview-box {
+  border: 1px solid #404040;
+  border-radius: 6px;
+  background-color: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.preview-box.size-large {
+  width: 48px;
+  height: 48px;
+}
+
+.preview-box.size-medium {
+  width: 36px;
+  height: 36px;
+}
+
+.preview-box.size-small {
+  width: 24px;
+  height: 24px;
+}
+
+.preview-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preview-item span {
+  color: #888888;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Social Links */
+.social-links {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* Bottom Section */
+.form-bottom {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid #404040;
+}
+
+.save-button {
+  background-color: #666666;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.save-button:hover:not(:disabled) {
+  background-color: #777777;
+}
+
+.save-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .launchpad-form {
+    padding: 16px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .image-upload-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .social-links {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-bottom {
+    justify-content: stretch;
+  }
+  
+  .save-button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,222 @@
+/**
+ * Drafts List Component Styles
+ * Clean list design matching the screenshots
+ */
+
+.drafts-list,
+.drafts-list-empty {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.drafts-list-empty {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.empty-state p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Drafts Header */
+.drafts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.drafts-header h3 {
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.drafts-count {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Drafts Items */
+.drafts-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.draft-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.draft-item:hover {
+  border-color: var(--accent-green);
+  background: rgba(0, 255, 136, 0.02);
+}
+
+.draft-number {
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 14px;
+  min-width: 20px;
+}
+
+.draft-content {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 0;
+}
+
+.draft-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.draft-title {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.draft-subtitle {
+  color: var(--text-secondary);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.draft-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+}
+
+.status-badge {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.draft {
+  background: rgba(255, 107, 53, 0.1);
+  color: var(--accent-orange);
+  border: 1px solid rgba(255, 107, 53, 0.2);
+}
+
+.status-badge.saved {
+  background: rgba(0, 255, 136, 0.1);
+  color: var(--accent-green);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.draft-option {
+  font-size: 16px;
+  opacity: 0.7;
+}
+
+.draft-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.draft-item:hover .draft-actions {
+  opacity: 1;
+}
+
+.edit-btn,
+.delete-btn {
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-btn:hover {
+  background: var(--accent-green);
+  color: var(--bg-primary);
+  border-color: var(--accent-green);
+}
+
+.delete-btn {
+  font-weight: bold;
+  padding: 4px 6px;
+}
+
+.delete-btn:hover {
+  background: var(--accent-red);
+  color: white;
+  border-color: var(--accent-red);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .draft-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .draft-status {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+  
+  .draft-actions {
+    opacity: 1;
+  }
+}
