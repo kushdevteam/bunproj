@@ -1,0 +1,318 @@
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  padding: 20px;
+}
+
+.login-form {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  padding: 40px;
+  width: 100%;
+  max-width: 450px;
+  position: relative;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.logo-section .logo {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.logo-section h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.logo-section p {
+  margin: 5px 0 0 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.auth-form h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.input-group {
+  margin-bottom: 25px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.username-input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  font-size: 1rem;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.username-input:focus {
+  outline: none;
+  border-color: var(--accent-green);
+  box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+}
+
+.username-input.error {
+  border-color: var(--accent-red);
+}
+
+.pin-input-container {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.pin-digit {
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.pin-digit:focus {
+  outline: none;
+  border-color: var(--accent-green);
+  box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+}
+
+.pin-digit.error {
+  border-color: var(--accent-red);
+}
+
+.error-message {
+  background: rgba(255, 68, 68, 0.1);
+  color: var(--accent-red);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  border: 1px solid var(--accent-red);
+}
+
+.login-button {
+  width: 100%;
+  padding: 15px;
+  background: var(--accent-green);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 15px;
+}
+
+.login-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: var(--accent-blue);
+  box-shadow: 0 10px 20px rgba(0, 255, 136, 0.3);
+}
+
+.login-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.login-button.disabled {
+  opacity: 0.4;
+}
+
+.clear-button {
+  width: 100%;
+  padding: 12px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clear-button:hover:not(:disabled) {
+  background: var(--border-color);
+}
+
+.demo-section {
+  margin-top: 30px;
+  padding: 20px;
+  background: var(--bg-tertiary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.demo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.demo-header h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.demo-toggle {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
+.demo-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.demo-button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.demo-button.admin {
+  background: var(--accent-orange);
+  color: var(--bg-primary);
+}
+
+.demo-button.user {
+  background: var(--accent-blue);
+  color: var(--bg-primary);
+}
+
+.demo-button small {
+  display: block;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.demo-note {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-align: center;
+  margin: 0;
+}
+
+.help-section {
+  margin-top: 25px;
+  padding: 20px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+}
+
+.help-section h4 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.help-section ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.help-section li {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+
+.status-indicators {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.indicator {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.status-dot.online {
+  background: var(--accent-green);
+}
+
+.status-dot.secure {
+  background: var(--accent-blue);
+}
+
+.spinner {
+  display: inline-block;
+  margin-right: 8px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 480px) {
+  .login-form {
+    padding: 30px 25px;
+  }
+  
+  .pin-digit {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+  
+  .demo-buttons {
+    flex-direction: column;
+  }
+}
