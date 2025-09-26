@@ -7,6 +7,7 @@
 import { JsonRpcProvider, formatEther, parseEther, Wallet, parseUnits } from 'ethers';
 import { config } from '../config/env';
 import type { NetworkConfig } from '../types';
+import { validatePrivateKey } from '../utils/crypto';
 
 export interface BlockchainStats {
   blockNumber: number;
@@ -461,9 +462,10 @@ class BSCRPCClient {
       throw new Error('Provider not initialized');
     }
 
-    // CRITICAL SECURITY: Enforce testnet-only execution
-    if (this.currentNetwork.chainId !== 97) {
-      throw new Error(`SAFETY: Transaction broadcast blocked. Only BSC Testnet (chainId: 97) is allowed, but connected to chainId ${this.currentNetwork.chainId}`);
+    // Network validation: Support both BSC Testnet and Mainnet
+    const allowedChainIds = [56, 97]; // BSC Mainnet (56) and BSC Testnet (97)
+    if (!allowedChainIds.includes(this.currentNetwork.chainId)) {
+      throw new Error(`Unsupported network: Only BSC networks are allowed, but connected to chainId ${this.currentNetwork.chainId}`);
     }
 
     try {
@@ -508,14 +510,18 @@ class BSCRPCClient {
       throw new Error('Provider not initialized');
     }
 
-    // CRITICAL SECURITY: Enforce testnet-only execution
-    if (this.currentNetwork.chainId !== 97) {
-      throw new Error(`SAFETY: Transaction creation blocked. Only BSC Testnet (chainId: 97) is allowed, but connected to chainId ${this.currentNetwork.chainId}`);
+    // Network validation: Support both BSC Testnet and Mainnet
+    const allowedChainIds = [56, 97]; // BSC Mainnet (56) and BSC Testnet (97)
+    if (!allowedChainIds.includes(this.currentNetwork.chainId)) {
+      throw new Error(`Unsupported network: Only BSC networks are allowed, but connected to chainId ${this.currentNetwork.chainId}`);
     }
 
     try {
+      // Validate and format private key
+      const validatedPrivateKey = validatePrivateKey(privateKey);
+      
       // Create wallet instance
-      const wallet = new Wallet(privateKey, this.provider);
+      const wallet = new Wallet(validatedPrivateKey, this.provider);
       
       // Get current nonce
       const nonce = await this.provider.getTransactionCount(wallet.address, 'pending');
@@ -589,9 +595,10 @@ class BSCRPCClient {
       throw new Error('Provider not initialized');
     }
 
-    // CRITICAL SECURITY: Enforce testnet-only execution
-    if (this.currentNetwork.chainId !== 97) {
-      throw new Error(`SAFETY: Transaction confirmation blocked. Only BSC Testnet (chainId: 97) is allowed, but connected to chainId ${this.currentNetwork.chainId}`);
+    // Network validation: Support both BSC Testnet and Mainnet
+    const allowedChainIds = [56, 97]; // BSC Mainnet (56) and BSC Testnet (97)
+    if (!allowedChainIds.includes(this.currentNetwork.chainId)) {
+      throw new Error(`Unsupported network: Only BSC networks are allowed, but connected to chainId ${this.currentNetwork.chainId}`);
     }
 
     try {

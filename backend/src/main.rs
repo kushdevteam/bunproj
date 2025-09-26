@@ -37,29 +37,19 @@ async fn health_check() -> Json<ApiResponse<HealthResponse>> {
     Json(ApiResponse::success(response))
 }
 
-// Generate wallets endpoint (mock implementation)
+/// SECURITY FIX: Deprecated wallet generation endpoint
+/// Private keys should NEVER be generated on the backend
 async fn generate_wallets(
     Json(req): Json<GenerateWalletsRequest>,
 ) -> Result<Json<ApiResponse<Vec<WalletInfo>>>, StatusCode> {
-    if req.count == 0 || req.count > 100 {
-        return Ok(Json(ApiResponse::error("Wallet count must be between 1 and 100".to_string())));
-    }
-
-    let mut wallets = Vec::new();
-    for i in 0..req.count {
-        // Generate mock BNB addresses for now
-        let address = format!("0x{:040x}", i + 1);
-        let wallet = WalletInfo {
-            address,
-            balance_bnb: 0.0,
-            balance_tokens: 0.0,
-            created_at: chrono::Utc::now(),
-        };
-        wallets.push(wallet);
-    }
-
-    info!("Generated {} mock wallets", req.count);
-    Ok(Json(ApiResponse::success(wallets)))
+    warn!("🚨 SECURITY: Backend wallet generation endpoint called - this is deprecated");
+    warn!("🔒 SECURITY: Use client-side wallet generation instead");
+    warn!("Request attempted to generate {} wallets - BLOCKED for security", req.count);
+    
+    // Return error to force client-side generation
+    Ok(Json(ApiResponse::error(
+        "SECURITY: Backend wallet generation disabled. Generate wallets client-side only.".to_string()
+    )))
 }
 
 // Get wallet balances endpoint (mock implementation)

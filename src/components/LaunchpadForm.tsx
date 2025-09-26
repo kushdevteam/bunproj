@@ -9,9 +9,10 @@ import './LaunchpadForm.css';
 
 interface LaunchpadFormProps {
   onNavigateToLaunchPlan?: () => void;
+  isEditingMode?: boolean;
 }
 
-export const LaunchpadForm: React.FC<LaunchpadFormProps> = ({ onNavigateToLaunchPlan }) => {
+export const LaunchpadForm: React.FC<LaunchpadFormProps> = ({ onNavigateToLaunchPlan, isEditingMode = false }) => {
   const {
     formState,
     updateFormField,
@@ -21,7 +22,6 @@ export const LaunchpadForm: React.FC<LaunchpadFormProps> = ({ onNavigateToLaunch
     validateForm,
     saveDraft,
     createDraft,
-    showConfirmation,
   } = useLaunchStore();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -29,12 +29,12 @@ export const LaunchpadForm: React.FC<LaunchpadFormProps> = ({ onNavigateToLaunch
 
   const { currentDraft, validationErrors, isSaving } = formState;
 
-  // Initialize draft if none exists
+  // Initialize draft if none exists (only when not in editing mode)
   React.useEffect(() => {
-    if (!currentDraft.id) {
+    if (!currentDraft.id && !isEditingMode) {
       createDraft();
     }
-  }, [currentDraft.id, createDraft]);
+  }, [currentDraft.id, createDraft, isEditingMode]);
 
   // Auto-select "Four" option on load if none selected
   React.useEffect(() => {
@@ -78,16 +78,18 @@ export const LaunchpadForm: React.FC<LaunchpadFormProps> = ({ onNavigateToLaunch
     }
   }, [setImage]);
 
-  // Handle save - now triggers confirmation modal after successful save
-  const handleSave = useCallback(async () => {
+  // Handle mint - now triggers launch plan generation first
+  const handleMint = useCallback(async () => {
     if (validateForm()) {
       const success = await saveDraft();
       if (success) {
-        // Show confirmation modal after successful save
-        showConfirmation(formState.currentDraft);
+        // Navigate to launch plan generation instead of showing confirmation modal
+        if (onNavigateToLaunchPlan) {
+          onNavigateToLaunchPlan();
+        }
       }
     }
-  }, [validateForm, saveDraft, showConfirmation, formState.currentDraft]);
+  }, [validateForm, saveDraft, onNavigateToLaunchPlan]);
 
   return (
     <div className="launchpad-form">
@@ -262,14 +264,14 @@ export const LaunchpadForm: React.FC<LaunchpadFormProps> = ({ onNavigateToLaunch
         </div>
       </div>
 
-      {/* Save Button */}
+      {/* Mint Button */}
       <div className="form-bottom">
         <button
-          className="save-button"
-          onClick={handleSave}
+          className="mint-button"
+          onClick={handleMint}
           disabled={isSaving}
         >
-          {isSaving ? 'Saving...' : 'Save'}
+          {isSaving ? 'Saving...' : 'Mint'}
         </button>
       </div>
     </div>

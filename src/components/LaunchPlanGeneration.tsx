@@ -31,8 +31,8 @@ export const LaunchPlanGeneration: React.FC = () => {
     savePlan,
   } = useLaunchPlanStore();
 
-  // Get current draft from launches store
-  const { formState } = useLaunchStore();
+  // Get current draft from launches store and showConfirmation for modal
+  const { formState, showConfirmation } = useLaunchStore();
   const { currentDraft } = formState;
 
   // Local state for initialization
@@ -89,6 +89,24 @@ export const LaunchPlanGeneration: React.FC = () => {
   // Calculate fresh and aged wallet counts for display
   const freshCount = generatedWallets.filter((w: GeneratedWallet) => w.type === 'fresh').length;
   const agedCount = generatedWallets.filter((w: GeneratedWallet) => w.type === 'aged').length;
+
+  // BNB calculation based on configuration
+  const calculateMinimumBnb = useCallback(() => {
+    // Base calculation: Each wallet needs minimum 0.01 BNB for gas
+    const baseGasPerWallet = 0.01;
+    const totalGasCost = disperseWalletsCount * baseGasPerWallet;
+    
+    // Additional BNB needed for dev buy percentage
+    const devBuyAmount = (devBuyPercent / 100) * 0.1; // Assume 0.1 BNB base for dev buy
+    
+    // Additional BNB for supply buy across all wallets
+    const supplyBuyAmount = (supplyBuyPercent / 100) * 0.05 * disperseWalletsCount; // 0.05 BNB per wallet for supply buy
+    
+    // Total minimum BNB required
+    return totalGasCost + devBuyAmount + supplyBuyAmount;
+  }, [disperseWalletsCount, devBuyPercent, supplyBuyPercent]);
+
+  const minimumBnb = calculateMinimumBnb();
 
   const handleLaunchModeSelect = useCallback((mode: 'quick' | 'organic') => {
     setLaunchMode(mode);
@@ -296,6 +314,29 @@ export const LaunchPlanGeneration: React.FC = () => {
           )}
         </div>
 
+        {/* BNB Requirements Display */}
+        <div className="bnb-requirements">
+          <h3 className="subsection-title">BNB Requirements</h3>
+          <div className="requirement-details">
+            <div className="requirement-item">
+              <span className="requirement-label">Gas fees ({disperseWalletsCount} wallets):</span>
+              <span className="requirement-value">{(disperseWalletsCount * 0.01).toFixed(3)} BNB</span>
+            </div>
+            <div className="requirement-item">
+              <span className="requirement-label">Dev buy ({devBuyPercent}%):</span>
+              <span className="requirement-value">{((devBuyPercent / 100) * 0.1).toFixed(3)} BNB</span>
+            </div>
+            <div className="requirement-item">
+              <span className="requirement-label">Supply buy ({supplyBuyPercent}%):</span>
+              <span className="requirement-value">{((supplyBuyPercent / 100) * 0.05 * disperseWalletsCount).toFixed(3)} BNB</span>
+            </div>
+            <div className="requirement-total">
+              <span className="total-label">Total minimum required:</span>
+              <span className="total-value">{minimumBnb.toFixed(3)} BNB</span>
+            </div>
+          </div>
+        </div>
+
         {/* Generate Button */}
         <div className="generate-section">
           <button
@@ -400,6 +441,28 @@ export const LaunchPlanGeneration: React.FC = () => {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Proceed to Launch Button - only show after wallets are generated */}
+        {generatedWallets.length > 0 && (
+          <div className="proceed-section">
+            <div className="proceed-info">
+              <div className="proceed-message">
+                <strong>Configuration Complete!</strong>
+                <p>
+                  {freshCount} fresh wallets and {agedCount} aged wallets have been generated.
+                  Total BNB required: <strong>{minimumBnb.toFixed(3)} BNB</strong>
+                </p>
+              </div>
+            </div>
+            <button 
+              className="proceed-btn"
+              onClick={() => showConfirmation(currentDraft)}
+              disabled={!currentDraft?.id}
+            >
+              🚀 Proceed to Launch
+            </button>
           </div>
         )}
 

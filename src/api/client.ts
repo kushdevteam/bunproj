@@ -8,15 +8,12 @@ import type {
   ApiResponse,
   ApiError,
   HealthResponse,
-  GenerateWalletsRequest,
-  GenerateWalletsResponse,
   FundWalletsRequest,
   FundWalletsResponse,
   ExecuteBundleRequest,
   ExecuteBundleResponse,
   CreateTokenRequest,
   CreateTokenResponse,
-  Wallet,
   TaxConfiguration,
   UpdateTaxConfigRequest,
   TaxStatistics,
@@ -133,19 +130,9 @@ class ApiClient {
     return this.get<HealthResponse>('/api/health');
   }
 
-  /**
-   * Generate wallets
-   * Note: Private keys are handled client-side only
-   */
-  async generateWallets(request: GenerateWalletsRequest): Promise<ApiResponse<GenerateWalletsResponse>> {
-    // Remove any private key references before sending
-    const sanitizedRequest = {
-      count: request.count,
-      roles: request.roles,
-    };
-    
-    return this.post<GenerateWalletsResponse>('/api/wallets/generate', sanitizedRequest);
-  }
+  // SECURITY FIX: generateWallets function completely removed
+  // Backend wallet generation is permanently disabled for security
+  // All wallet generation is now handled client-side only
 
   /**
    * Get wallet balances
@@ -238,11 +225,32 @@ class ApiClient {
     return this.get<any>(`/api/launch-plans/${id}`);
   }
 
+  // SECURITY FIX: generateWalletsForPlan function completely removed
+  // Backend wallet generation is permanently disabled for security
+  // All wallet generation is now handled client-side only
+
   /**
-   * Generate wallets for launch plan
+   * Store wallet addresses (public keys only) for a launch plan
+   * SECURITY: Only accepts public addresses, never private keys
    */
-  async generateWalletsForPlan(request: { launch_plan_id: string; count: number }): Promise<ApiResponse<any[]>> {
-    return this.post<any[]>('/api/wallets/generate', request);
+  async storeWalletAddresses(request: { 
+    launch_plan_id: string; 
+    wallets: Array<{
+      id: string;
+      address: string;
+      buy_percentage: number;
+      wallet_type: string;
+      created_at: string;
+    }>;
+  }): Promise<ApiResponse<any>> {
+    // Security validation: ensure no private keys in request
+    const hasPrivateKeys = JSON.stringify(request).includes('private');
+    if (hasPrivateKeys) {
+      throw new Error('SECURITY ERROR: Private keys detected in wallet storage request');
+    }
+    
+    console.log('🔒 SECURITY: Storing only PUBLIC ADDRESSES to backend');
+    return this.post<any>('/api/launch-plans/wallets', request);
   }
 
   /**

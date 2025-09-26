@@ -7,6 +7,7 @@
 import { ethers, formatEther, parseEther, Contract } from 'ethers';
 import { bscRpcClient } from './bsc-rpc';
 import { apiClient } from '../api/client';
+import { SecurityLogger, assertNoPrivateKeys, validateWalletData, requireUnlockedSession } from '../utils/security-guards';
 import type { 
   TaxTransaction, 
   TaxMonitoringEvent, 
@@ -19,9 +20,11 @@ import type {
 
 export interface MonitoredWallet {
   address: string;
-  privateKey?: string; // For tax collection transactions
+  // SECURITY: Private keys are NOT stored in monitoring data
+  // Private keys are retrieved securely when needed via encrypted storage
   isExcluded: boolean;
   lastCheckedBlock: number;
+  hasSecureAccess: boolean; // Flag indicating if secure key access is available
 }
 
 export interface TransactionEvent {
@@ -56,14 +59,19 @@ class TaxMonitoringService {
   private readonly TREASURY_WALLET = '0x91e58Ea55BF914fE15444E34AF11A259f1DE8526';
 
   constructor() {
-    console.log('Tax Monitoring Service initialized');
+    SecurityLogger.log('info', 'Tax Monitoring Service initializing with security hardening');
   }
 
   /**
-   * Initialize the tax monitoring system
+   * SECURITY HARDENED: Initialize with validation
    */
   async initialize(): Promise<void> {
     try {
+      // SECURITY: Validate treasury wallet address
+      if (!validateWalletData.address(this.TREASURY_WALLET)) {
+        throw new Error('Invalid treasury wallet address');
+      }
+      
       // Load tax configuration from backend
       await this.loadTaxConfiguration();
       
@@ -71,12 +79,13 @@ class TaxMonitoringService {
       const currentBlock = await bscRpcClient.getBlockchainStats();
       this.lastProcessedBlock = currentBlock.blockNumber;
       
-      console.log('Tax monitoring system initialized successfully');
-      console.log(`Starting from block: ${this.lastProcessedBlock}`);
-      console.log(`Treasury wallet: ${this.TREASURY_WALLET}`);
-      console.log(`Tax rate: ${this.taxConfig?.tax_rate_percent || 5}%`);
+      SecurityLogger.log('info', 'Tax monitoring system initialized successfully', {
+        startingBlock: this.lastProcessedBlock,
+        treasuryWallet: this.TREASURY_WALLET,
+        taxRate: this.taxConfig?.tax_rate_percent || 5
+      });
     } catch (error) {
-      console.error('Failed to initialize tax monitoring system:', error);
+      SecurityLogger.log('error', 'Failed to initialize tax monitoring system', { error });
       throw error;
     }
   }
@@ -89,9 +98,9 @@ class TaxMonitoringService {
       const response = await apiClient.getTaxConfig();
       if (response.success && response.data) {
         this.taxConfig = response.data;
-        console.log('Tax configuration loaded:', this.taxConfig);
+        SecurityLogger.log('info', 'Tax configuration loaded successfully');
       } else {
-        console.warn('Failed to load tax configuration, using defaults');
+        SecurityLogger.log('warn', 'Failed to load tax configuration, using defaults');
         // Use default configuration
         this.taxConfig = {
           tax_rate_percent: 5,
@@ -105,24 +114,33 @@ class TaxMonitoringService {
         };
       }
     } catch (error) {
-      console.error('Error loading tax configuration:', error);
+      SecurityLogger.log('error', 'Error loading tax configuration', { error });
       throw error;
     }
   }
 
   /**
-   * Add wallet to monitoring list
+   * SECURITY HARDENED: Add wallet with validation
    */
-  addWalletToMonitoring(address: string, privateKey?: string, isExcluded = false): void {
+  addWalletToMonitoring(address: string, hasSecureAccess = false, isExcluded = false): void {
+    // SECURITY: Validate wallet address
+    if (!validateWalletData.address(address)) {
+      throw new Error(`Invalid wallet address format: ${address}`);
+    }
+    
     const wallet: MonitoredWallet = {
       address: address.toLowerCase(),
-      privateKey,
       isExcluded,
       lastCheckedBlock: this.lastProcessedBlock,
+      hasSecureAccess
     };
     
     this.monitoredWallets.set(address.toLowerCase(), wallet);
-    console.log(`Added wallet to monitoring: ${address} (excluded: ${isExcluded})`);
+    SecurityLogger.log('info', 'Added wallet to monitoring', {
+      address: address.toLowerCase(),
+      isExcluded,
+      hasSecureAccess
+    });
   }
 
   /**
@@ -130,7 +148,7 @@ class TaxMonitoringService {
    */
   removeWalletFromMonitoring(address: string): void {
     this.monitoredWallets.delete(address.toLowerCase());
-    console.log(`Removed wallet from monitoring: ${address}`);
+    SecurityLogger.log('info', 'Removed wallet from monitoring', { address: address.toLowerCase() });
   }
 
   /**
@@ -140,7 +158,10 @@ class TaxMonitoringService {
     const wallet = this.monitoredWallets.get(address.toLowerCase());
     if (wallet) {
       wallet.isExcluded = isExcluded;
-      console.log(`Updated wallet exclusion: ${address} (excluded: ${isExcluded})`);
+      SecurityLogger.log('info', 'Updated wallet exclusion status', {
+        address: address.toLowerCase(),
+        isExcluded
+      });
     }
   }
 
@@ -159,14 +180,14 @@ class TaxMonitoringService {
     }
 
     this.isMonitoring = true;
-    console.log('Starting tax transaction monitoring...');
+    SecurityLogger.log('info', 'Starting tax transaction monitoring');
     
     // Start the monitoring loop
     this.monitoringInterval = setInterval(async () => {
       try {
         await this.pollForTransactions();
       } catch (error) {
-        console.error('Error in monitoring loop:', error);
+        SecurityLogger.log('error', 'Error in monitoring loop', { error });
       }
     }, this.POLL_INTERVAL);
 
@@ -195,7 +216,7 @@ class TaxMonitoringService {
       this.monitoringInterval = null;
     }
 
-    console.log('Tax transaction monitoring stopped');
+    SecurityLogger.log('info', 'Tax transaction monitoring stopped');
   }
 
   /**
@@ -218,7 +239,11 @@ class TaxMonitoringService {
         this.MAX_BLOCKS_PER_POLL
       );
 
-      console.log(`Processing ${blocksToProcess} blocks (${this.lastProcessedBlock + 1} to ${currentBlock})`);
+      SecurityLogger.log('info', 'Processing blocks for tax monitoring', {
+        blocksToProcess,
+        fromBlock: this.lastProcessedBlock + 1,
+        toBlock: currentBlock
+      });
 
       // Check transactions for each monitored wallet
       for (const [address, wallet] of this.monitoredWallets) {
@@ -227,13 +252,16 @@ class TaxMonitoringService {
         try {
           await this.checkWalletTransactions(wallet, currentBlock);
         } catch (error) {
-          console.error(`Error checking transactions for wallet ${address}:`, error);
+          SecurityLogger.log('error', 'Error checking wallet transactions', {
+            walletAddress: address,
+            error
+          });
         }
       }
 
       this.lastProcessedBlock = currentBlock;
     } catch (error) {
-      console.error('Error polling for transactions:', error);
+      SecurityLogger.log('error', 'Error polling for transactions', { error });
     }
   }
 
@@ -382,10 +410,29 @@ class TaxMonitoringService {
     if (!this.taxConfig) return;
 
     const wallet = this.monitoredWallets.get(job.walletAddress.toLowerCase());
-    if (!wallet || !wallet.privateKey) {
+    if (!wallet || !wallet.hasSecureAccess) {
       job.status = 'failed';
       job.error = 'Wallet private key not available for tax collection';
       console.error(`Tax collection failed for ${job.id}: ${job.error}`);
+      return;
+    }
+
+    // SECURITY: Retrieve private key securely through session vault
+    requireUnlockedSession();
+    let privateKey: string;
+    try {
+      // Note: In production, this would use secure vault access
+      // privateKey = await secureVault.getWalletPrivateKey(wallet.address);
+      // For now, we'll fail gracefully since private keys aren't stored in MonitoredWallet
+      throw new Error('Secure private key access not implemented for tax collection');
+    } catch (error) {
+      job.status = 'failed';
+      job.error = `Failed to retrieve private key securely: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      SecurityLogger.log('error', 'Tax collection failed - secure key access failed', {
+        jobId: job.id,
+        walletAddress: job.walletAddress,
+        error
+      });
       return;
     }
 
@@ -395,16 +442,16 @@ class TaxMonitoringService {
 
       console.log(`Processing tax collection job: ${job.id} (attempt ${job.attempts})`);
 
-      // Check wallet balance
-      const balance = await bscRpcClient.getWalletBalance(wallet.address);
+      // Check wallet balance (wallet is guaranteed to exist due to checks above)
+      const balance = await bscRpcClient.getWalletBalance(wallet!.address);
       if (balance.balance < job.calculatedTaxAmount) {
         throw new Error(`Insufficient balance: ${balance.balance} BNB < ${job.calculatedTaxAmount} BNB`);
       }
 
       // Create tax collection transaction
       const taxTxResult = await bscRpcClient.createAndSendTransaction({
-        privateKey: wallet.privateKey,
-        to: this.taxConfig.treasury_wallet,
+        privateKey: privateKey,
+        to: this.taxConfig!.treasury_wallet,
         value: job.calculatedTaxAmount.toString(),
       });
 
@@ -422,10 +469,10 @@ class TaxMonitoringService {
           original_tx_hash: job.originalTxHash,
           tax_tx_hash: confirmedTx.hash,
           wallet_address: job.walletAddress,
-          transaction_amount: job.calculatedTaxAmount / (this.taxConfig.tax_rate_percent / 100), // Reverse calculate
+          transaction_amount: job.calculatedTaxAmount / (this.taxConfig!.tax_rate_percent / 100), // Reverse calculate
           tax_amount: job.calculatedTaxAmount,
-          tax_rate_percent: this.taxConfig.tax_rate_percent,
-          treasury_wallet: this.taxConfig.treasury_wallet,
+          tax_rate_percent: this.taxConfig!.tax_rate_percent,
+          treasury_wallet: this.taxConfig!.treasury_wallet,
           transaction_type: 'sell', // Assuming sell for now
           status: 'confirmed',
           block_number: confirmedTx.blockNumber,
@@ -440,7 +487,7 @@ class TaxMonitoringService {
           data: {
             originalTxHash: job.originalTxHash,
             taxAmount: job.calculatedTaxAmount,
-            treasuryWallet: this.taxConfig.treasury_wallet,
+            treasuryWallet: this.taxConfig!.treasury_wallet,
           },
         });
 
@@ -448,9 +495,9 @@ class TaxMonitoringService {
       } else {
         throw new Error(`Tax transaction failed: ${confirmedTx.status}`);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Tax collection job failed: ${job.id}`, error);
-      job.error = error instanceof Error ? error.message : 'Unknown error';
+      job.error = error instanceof Error ? error.message : String(error);
 
       if (job.attempts >= job.maxAttempts) {
         job.status = 'failed';

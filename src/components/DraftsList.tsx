@@ -3,14 +3,24 @@
  * Shows saved token drafts in a clean list format
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useLaunchStore } from '../store/launches';
 import './DraftsList.css';
 
-export const DraftsList: React.FC = () => {
-  const { drafts, loadDraft, deleteDraft } = useLaunchStore();
+interface DraftsListProps {
+  onEditDraft?: () => void;
+}
 
-  // Show default draft layout to match screenshot
+export const DraftsList: React.FC<DraftsListProps> = ({ onEditDraft }) => {
+  const { drafts, loadDraft, deleteDraft, archiveDraft, unarchiveDraft } = useLaunchStore();
+  const [showArchived, setShowArchived] = useState(false);
+
+  // Filter drafts based on showArchived toggle
+  const activeDrafts = drafts.filter(draft => draft.status !== 'archived');
+  const archivedDrafts = drafts.filter(draft => draft.status === 'archived');
+  const displayDrafts = showArchived ? archivedDrafts : activeDrafts;
+  
+  // Show default draft layout to match screenshot when no active drafts
   const defaultDraft = {
     id: 'default',
     projectName: 'Untitled',
@@ -18,17 +28,28 @@ export const DraftsList: React.FC = () => {
     status: 'draft' as const,
   };
   
-  const displayDrafts = drafts.length === 0 ? [defaultDraft] : drafts;
+  const finalDisplayDrafts = (!showArchived && displayDrafts.length === 0) ? [defaultDraft] : displayDrafts;
 
   return (
     <div className="drafts-list">
       <div className="drafts-header">
-        <h3>Saved Drafts</h3>
-        <span className="drafts-count">{displayDrafts.length}</span>
+        <div className="drafts-header-left">
+          <h3>{showArchived ? 'Archived Drafts' : 'Saved Drafts'}</h3>
+          <span className="drafts-count">{displayDrafts.length}</span>
+        </div>
+        <div className="drafts-header-controls">
+          <button
+            className={`archive-toggle ${showArchived ? 'active' : ''}`}
+            onClick={() => setShowArchived(!showArchived)}
+            title={showArchived ? 'Show active drafts' : 'Show archived drafts'}
+          >
+            {showArchived ? 'Show Active' : `Archived (${archivedDrafts.length})`}
+          </button>
+        </div>
       </div>
 
       <div className="drafts-items">
-        {displayDrafts.map((draft, index) => (
+        {finalDisplayDrafts.map((draft, index) => (
           <div key={draft.id} className="draft-item">
             <div className="draft-number">{index + 1}.</div>
             <div className="draft-content">
@@ -42,26 +63,60 @@ export const DraftsList: React.FC = () => {
               </div>
               <div className="draft-status">
                 <span className={`status-badge ${draft.status}`}>
-                  {draft.status === 'draft' ? 'DRAFT' : 'SAVED'}
+                  {draft.status === 'draft' ? 'DRAFT' : draft.status === 'saved' ? 'SAVED' : 'ARCHIVED'}
                 </span>
               </div>
             </div>
             {draft.id !== 'default' && (
               <div className="draft-actions">
-                <button
-                  className="edit-btn"
-                  onClick={() => loadDraft(draft.id)}
-                  title="Edit draft"
-                >
-                  Edit
-                </button>
-                <button
-                  className="delete-btn"
-                  onClick={() => deleteDraft(draft.id)}
-                  title="Delete draft"
-                >
-                  ×
-                </button>
+                {!showArchived ? (
+                  <>
+                    <button
+                      className="edit-btn"
+                      onClick={() => {
+                        loadDraft(draft.id);
+                        if (onEditDraft) {
+                          onEditDraft();
+                        }
+                      }}
+                      title="Edit draft"
+                      disabled={draft.status === 'archived'}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="archive-btn"
+                      onClick={() => archiveDraft(draft.id)}
+                      title="Archive draft"
+                    >
+                      Archive
+                    </button>
+                    <button
+                      className="delete-btn"
+                      onClick={() => deleteDraft(draft.id)}
+                      title="Delete draft"
+                    >
+                      ×
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      className="unarchive-btn"
+                      onClick={() => unarchiveDraft(draft.id)}
+                      title="Unarchive draft"
+                    >
+                      Unarchive
+                    </button>
+                    <button
+                      className="delete-btn"
+                      onClick={() => deleteDraft(draft.id)}
+                      title="Delete draft"
+                    >
+                      ×
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>

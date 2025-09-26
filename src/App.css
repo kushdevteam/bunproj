@@ -1239,6 +1239,54 @@ body {
     display: none; 
   }
   
+  /* CRITICAL FIX: Remove sidebar margin on mobile */
+  .app-container .main-content {
+    margin-left: 0;
+    margin-top: 60px;
+    height: calc(100vh - 60px);
+  }
+  
+  /* Header adjustments for mobile */
+  .app-header {
+    padding: 0 16px;
+  }
+  
+  .header-left {
+    gap: 12px;
+  }
+  
+  .header-right {
+    gap: 8px;
+  }
+  
+  /* Show network selector but hide time filter on mobile */
+  .time-filter {
+    display: none;
+  }
+  
+  /* Make network selector more compact on mobile */
+  .network-selector {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  
+  .network-dot {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .network-name {
+    font-size: 12px;
+  }
+  
+  .user-indicator {
+    padding: 4px 8px;
+  }
+  
+  .page-title-header {
+    font-size: 14px;
+  }
+  
   .stats-grid { 
     grid-template-columns: 1fr; 
   }
@@ -1249,6 +1297,103 @@ body {
   
   .dev-stats { 
     grid-template-columns: 1fr; 
+  }
+  
+  /* Mobile-specific improvements for better UX */
+  .main-content {
+    padding: 16px;
+    overflow-x: hidden;
+  }
+  
+  /* Improve touch targets for mobile buttons */
+  button, .nav-arrow, .calendar-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better mobile input handling */
+  input, textarea, select {
+    font-size: 16px; /* Prevent zoom on iOS */
+    min-height: 44px;
+  }
+  
+  /* Ensure scrollable content doesn't break layout */
+  .app-container {
+    overflow: hidden;
+  }
+  
+  .app-container .main-content {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Additional mobile breakpoint for very small screens */
+@media (max-width: 480px) {
+  .app-header {
+    padding: 0 12px;
+  }
+  
+  .header-left .logo h1 {
+    display: none;
+  }
+  
+  .header-right {
+    gap: 6px;
+  }
+  
+  /* Ensure network selector is still visible on very small screens */
+  .network-selector {
+    padding: 2px 6px;
+    font-size: 11px;
+    border-radius: 4px;
+  }
+  
+  .network-dot {
+    width: 5px;
+    height: 5px;
+  }
+  
+  .network-name {
+    font-size: 11px;
+  }
+  
+  .logout-btn {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  
+  .logout-btn span {
+    display: none;
+  }
+  
+  .nav-arrow {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+  }
+  
+  /* Mobile accessibility improvements */
+  .header-left .logo-icon {
+    min-width: 32px;
+    min-height: 32px;
+  }
+  
+  /* Better mobile header layout */
+  .header-left {
+    min-width: 0;
+    flex-shrink: 1;
+  }
+  
+  .header-right {
+    flex-shrink: 0;
+  }
+  
+  /* Ensure network selector is always accessible on mobile */
+  .network-selector {
+    flex-shrink: 0;
+    min-width: 120px;
   }
 }
 

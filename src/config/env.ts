@@ -6,9 +6,9 @@ export const config = {
   // API Configuration
   api: {
     baseUrl: process.env.REACT_APP_API_URL || (
-      // Use relative URLs for internal routing, full URL for external access
-      process.env.NODE_ENV === 'development' && typeof window !== 'undefined' && window.location.hostname !== 'localhost' 
-        ? `https://${window.location.hostname}:8000`
+      // In development, use relative URLs with package.json proxy
+      process.env.NODE_ENV === 'development'
+        ? ''
         : ''
     ),
     timeout: parseInt(process.env.REACT_APP_API_TIMEOUT || '30000'),

@@ -952,10 +952,16 @@
   .admin-header {
     flex-direction: column;
     gap: 15px;
+    padding: 16px 20px;
   }
 
   .admin-tabs {
     overflow-x: auto;
+    padding: 0 20px;
+  }
+
+  .admin-content {
+    padding: 20px;
   }
 
   .form-grid {
@@ -980,6 +986,8 @@
     width: 100%;
     margin-right: 0;
     margin-bottom: 10px;
+    min-height: 44px;
+    padding: 12px 18px;
   }
 
   .settings-modal-content {
@@ -993,5 +1001,69 @@
 
   .data-management-section {
     grid-template-columns: 1fr;
+  }
+
+  /* Improve touch targets for mobile */
+  .logout-button {
+    padding: 12px 16px;
+    min-height: 44px;
+  }
+
+  .tab {
+    padding: 16px 20px;
+    min-height: 44px;
+  }
+
+  .action-button {
+    padding: 12px 16px;
+    min-height: 44px;
+    margin-bottom: 8px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .create-button,
+  .submit-button,
+  .cancel-button,
+  .setting-button {
+    min-height: 44px;
+    padding: 12px 20px;
+  }
+
+  .settings-save-button,
+  .settings-cancel-button {
+    min-height: 44px;
+    padding: 14px 24px;
+  }
+}
+
+/* Additional mobile improvements for very small screens */
+@media (max-width: 480px) {
+  .admin-header {
+    padding: 12px 16px;
+  }
+
+  .admin-tabs {
+    padding: 0 16px;
+  }
+
+  .admin-content {
+    padding: 16px;
+  }
+
+  .header-title h1 {
+    font-size: 1.4rem;
+  }
+
+  .current-admin {
+    font-size: 0.8rem;
+  }
+
+  .settings-modal-content {
+    padding: 16px;
+    width: 98%;
   }
 }

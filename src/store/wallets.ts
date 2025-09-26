@@ -8,17 +8,18 @@ import { persist } from 'zustand/middleware';
 import { Wallet as EthersWallet } from 'ethers';
 import { apiClient } from '../api/client';
 import { 
-  encryptPrivateKey, 
-  decryptPrivateKey, 
-  secureStore, 
-  secureRetrieve, 
-  secureRemove,
   stripPrivateKeys,
   generateSecureRandom,
   getSessionPassphrase
 } from '../utils/crypto';
+import { 
+  vaultStoreKey, 
+  vaultRetrieveKey, 
+  vaultRemoveKey
+} from '../utils/encrypted-vault';
+import { verifyStoreSecurityCompliance } from '../utils/storage-security';
 import { useSessionStore } from './session';
-import type { WalletStore, Wallet, GenerateWalletsRequest } from '../types';
+import type { WalletStore, Wallet } from '../types';
 import { Role } from '../types';
 
 interface WalletState extends WalletStore {
@@ -86,11 +87,10 @@ export const useWalletStore = create<WalletState>()(
             // Generate secure wallet ID
             const walletId = `wallet_${Date.now()}_${Array.from(generateSecureRandom(8)).map(b => b.toString(16).padStart(2, '0')).join('')}`;
             
-            // Encrypt private key with user-provided passphrase
-            const encryptedPrivateKey = await encryptPrivateKey(privateKey, passphrase);
-            
-            // Store encrypted private key securely
-            await secureStore(`wallet_${walletId}_pk`, encryptedPrivateKey);
+            // Store private key in encrypted vault with session management
+            const sessionState = useSessionStore.getState();
+            if (!sessionState.sessionId) throw new Error('Session required for secure storage');
+            await vaultStoreKey(walletId, privateKey, sessionState.sessionId, passphrase);
             
             // Create wallet object (without private key in memory)
             const wallet: Wallet = {
@@ -133,8 +133,9 @@ export const useWalletStore = create<WalletState>()(
 
       // Remove wallet
       removeWallet: async (id: string) => {
-        // Remove encrypted private key from storage
-        await secureRemove(`wallet_${id}_pk`);
+        // Remove private key from encrypted vault
+        const sessionState = useSessionStore.getState();
+        await vaultRemoveKey(id, sessionState.sessionId || undefined);
         
         set(state => ({
           wallets: state.wallets.filter(w => w.id !== id),
@@ -240,12 +241,17 @@ export const useWalletStore = create<WalletState>()(
       // Get decrypted private key (requires session passphrase)
       getDecryptedPrivateKey: async (walletId: string, passphrase: string): Promise<string | null> => {
         try {
-          const encryptedData = await secureRetrieve(`wallet_${walletId}_pk`);
-          if (!encryptedData) {
-            return null;
+          const sessionState = useSessionStore.getState();
+          if (!sessionState.sessionId) {
+            throw new Error('Session required for private key access');
           }
           
-          return await decryptPrivateKey(encryptedData, passphrase);
+          const privateKey = await vaultRetrieveKey(walletId, sessionState.sessionId, passphrase);
+          if (!privateKey) {
+            return null;
+          }
+
+          return privateKey;
         } catch (error) {
           console.error('Failed to decrypt private key:', error);
           return null;
@@ -261,11 +267,6 @@ export const useWalletStore = create<WalletState>()(
             throw new Error('Session is locked - please unlock to access wallet keys');
           }
 
-          const encryptedData = await secureRetrieve(`wallet_${walletId}_pk`);
-          if (!encryptedData) {
-            return null;
-          }
-
           // SECURITY FIX: Use securely stored passphrase from memory
           // This ensures wallet keys can only be decrypted if the user has properly unlocked their session
           // and the passphrase exists in memory (never persisted to storage)
@@ -276,8 +277,12 @@ export const useWalletStore = create<WalletState>()(
           }
           
           try {
-            // Use the securely stored session passphrase for decryption
-            return await decryptPrivateKey(encryptedData, sessionPassphrase);
+            // Use the encrypted vault with session management for decryption
+            const privateKey = await vaultRetrieveKey(walletId, sessionState.sessionId, sessionPassphrase);
+            if (!privateKey) {
+              return null;
+            }
+            return privateKey;
           } catch (decryptError) {
             // Decryption failed - wallet may have been encrypted with different passphrase
             console.warn('Failed to decrypt wallet with session passphrase. May have been encrypted with different passphrase.');
@@ -357,9 +362,10 @@ export const useWalletStore = create<WalletState>()(
           // Generate secure wallet ID
           const walletId = `imported_${Date.now()}_${Array.from(generateSecureRandom(8)).map(b => b.toString(16).padStart(2, '0')).join('')}`;
           
-          // Encrypt and store private key
-          const encryptedPrivateKey = await encryptPrivateKey(privateKey, passphrase);
-          await secureStore(`wallet_${walletId}_pk`, encryptedPrivateKey);
+          // Store private key in encrypted vault
+          const sessionState = useSessionStore.getState();
+          if (!sessionState.sessionId) throw new Error('Session required for secure storage');
+          await vaultStoreKey(walletId, privateKey, sessionState.sessionId, passphrase);
           
           // Create wallet object
           const wallet: Wallet = {
@@ -402,10 +408,11 @@ export const useWalletStore = create<WalletState>()(
       clearAllWallets: async () => {
         const state = get();
         
-        // Remove all encrypted private keys
+        // Remove all private keys from encrypted vault
+        const sessionState = useSessionStore.getState();
         await Promise.all(
           state.wallets.map(wallet => 
-            secureRemove(`wallet_${wallet.id}_pk`)
+            vaultRemoveKey(wallet.id, sessionState.sessionId || undefined)
           )
         );
         
@@ -430,6 +437,19 @@ export const useWalletStore = create<WalletState>()(
         selectedWallets: state.selectedWallets,
         lastUpdated: state.lastUpdated,
       }),
+      onRehydrateStorage: () => {
+        // SECURITY: Verify no private keys in persisted wallet data after rehydration
+        return (state, error) => {
+          if (!error) {
+            setTimeout(() => {
+              const isSecure = verifyStoreSecurityCompliance('bnb-bundler-wallets');
+              if (!isSecure) {
+                console.error('🚨 SECURITY: Wallet store rehydration failed security compliance');
+              }
+            }, 100);
+          }
+        };
+      },
     }
   )
 );

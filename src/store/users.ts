@@ -303,9 +303,10 @@ export const useUserStore = create<UserStore>()(
             
             set({ currentSession: session, isLoading: false });
             
-            // Automatically unlock session with default passphrase for access key login
+            // Clear any existing session state and unlock with access key 
             const sessionStore = useSessionStore.getState();
-            await sessionStore.unlock('default_session_key');
+            sessionStore.clearSession(); // Clear any previous session data
+            await sessionStore.unlock(accessKey);
             
             console.log('Admin access key login successful');
             return true;
@@ -347,9 +348,10 @@ export const useUserStore = create<UserStore>()(
               isLoading: false 
             });
             
-            // Automatically unlock session with default passphrase for access key login
+            // Clear any existing session state and unlock with access key 
             const sessionStore = useSessionStore.getState();
-            await sessionStore.unlock('default_session_key');
+            sessionStore.clearSession(); // Clear any previous session data
+            await sessionStore.unlock(accessKey);
             
             console.log(`Access key login successful: ${validAccessKey.label}`);
             return true;
@@ -698,7 +700,7 @@ export const useUserStore = create<UserStore>()(
           const updatedKeys = [...get().accessKeys, accessKey];
           set({ accessKeys: updatedKeys });
           
-          console.log(`Created access key: ${newKey} (Label: ${label})`);
+          console.log(`✅ Created access key: ${newKey} (Label: ${label})`);
           return newKey;
         } catch (error) {
           console.error('Error creating access key:', error);
@@ -778,15 +780,16 @@ export const useUserStore = create<UserStore>()(
           console.warn('Failed to clear crypto session data on reset:', error);
         }
         
-        // Reset to initial state while preserving admin access key
+        // Reset to initial state while preserving admin access key AND ALL existing access keys
+        const currentAccessKeys = get().accessKeys;
         set({
           users: [],
           currentSession: null,
           isInitialized: false,
           isLoading: false,
           error: null,
-          // Reset access keys but preserve admin key
-          accessKeys: [],
+          // Preserve ALL existing access keys (don't destroy created keys on reset)
+          accessKeys: currentAccessKeys.length > 0 ? currentAccessKeys : [DEFAULT_USER_ACCESS_KEY],
           // Reset admin credentials to defaults
           adminCredentials: DEFAULT_ADMIN,
           // Preserve the admin access key

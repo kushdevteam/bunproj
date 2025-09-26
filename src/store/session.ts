@@ -14,6 +14,7 @@ import {
   createSessionKey,
   clearSessionKey,
   storeSessionPassphrase,
+  vaultPurgeSession,
 } from '../utils/crypto';
 import type { SessionStore } from '../types';
 
@@ -137,12 +138,17 @@ export const useSessionStore = create<SessionState>()(
       },
 
       // Lock session
-      lock: () => {
+      lock: async () => {
         const state = get();
         
-        // Clear session key from memory
+        // Clear session key from memory and purge vault
         if (state.sessionId) {
           clearSessionKey(state.sessionId);
+          try {
+            await vaultPurgeSession(state.sessionId);
+          } catch (error) {
+            console.error('🔒 Failed to purge vault on session lock:', error);
+          }
         }
         
         set({
@@ -199,12 +205,17 @@ export const useSessionStore = create<SessionState>()(
       },
 
       // Clear entire session
-      clearSession: () => {
+      clearSession: async () => {
         const state = get();
         
-        // Clear session key from memory
+        // Clear session key from memory and purge vault
         if (state.sessionId) {
           clearSessionKey(state.sessionId);
+          try {
+            await vaultPurgeSession(state.sessionId);
+          } catch (error) {
+            console.error('🔒 Failed to purge vault on session clear:', error);
+          }
         }
         
         set({

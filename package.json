@@ -16,6 +16,7 @@
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.63.0",
     "react-scripts": "5.0.1",
+    "serve": "^14.2.5",
     "typescript": "^5.9.2",
     "web-vitals": "^2.1.4",
     "zod": "^4.1.11",

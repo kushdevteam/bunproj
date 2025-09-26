@@ -68,6 +68,9 @@ const App: React.FC = () => {
   
   // Active tab state for navigation - updated to match new design
   const [activeSection, setActiveSection] = React.useState<'dashboard' | 'launchpad' | 'launchplan' | 'archived' | 'bundler' | 'config' | 'execution' | 'analytics' | 'account'>('dashboard');
+  
+  // Track if we're in editing mode (when user clicks Edit on a draft)
+  const [isEditingMode, setIsEditingMode] = React.useState(false);
 
   // Initialize app on mount
   useEffect(() => {
@@ -228,6 +231,7 @@ const App: React.FC = () => {
             <button 
               className="create-launch-btn"
               onClick={() => {
+                setIsEditingMode(false); // Ensure we're not in editing mode for new drafts
                 createDraft();
                 setActiveSection('launchpad');
               }}
@@ -273,7 +277,12 @@ const App: React.FC = () => {
           {activeSection === 'dashboard' && (
             <>
               {/* Dashboard with Drafts */}
-              <DraftsList />
+              <DraftsList 
+                onEditDraft={() => {
+                  setIsEditingMode(true);
+                  setActiveSection('launchpad');
+                }}
+              />
             </>
           )}
 
@@ -282,6 +291,7 @@ const App: React.FC = () => {
               {/* Token Creation Launchpad */}
               <LaunchpadForm 
                 onNavigateToLaunchPlan={() => setActiveSection('launchplan')}
+                isEditingMode={isEditingMode}
               />
             </>
           )}

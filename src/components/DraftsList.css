@@ -52,6 +52,12 @@
   border-bottom: 1px solid var(--border-color);
 }
 
+.drafts-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .drafts-header h3 {
   color: var(--text-primary);
   font-size: 16px;
@@ -66,6 +72,36 @@
   border-radius: 10px;
   font-size: 12px;
   font-weight: 600;
+}
+
+.drafts-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.archive-toggle {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.archive-toggle:hover {
+  background: var(--bg-primary);
+  border-color: var(--accent-green);
+  color: var(--text-primary);
+}
+
+.archive-toggle.active {
+  background: rgba(0, 255, 136, 0.1);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
 }
 
 /* Drafts Items */
@@ -158,6 +194,12 @@
   border: 1px solid rgba(0, 255, 136, 0.2);
 }
 
+.status-badge.archived {
+  background: rgba(128, 128, 128, 0.1);
+  color: #888;
+  border: 1px solid rgba(128, 128, 128, 0.2);
+}
+
 .draft-option {
   font-size: 16px;
   opacity: 0.7;
@@ -175,7 +217,9 @@
 }
 
 .edit-btn,
-.delete-btn {
+.delete-btn,
+.archive-btn,
+.unarchive-btn {
   background: none;
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
@@ -187,6 +231,23 @@
 }
 
 .edit-btn:hover {
+  background: var(--accent-green);
+  color: var(--bg-primary);
+  border-color: var(--accent-green);
+}
+
+.edit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.archive-btn:hover {
+  background: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+  border-color: #ffc107;
+}
+
+.unarchive-btn:hover {
   background: var(--accent-green);
   color: var(--bg-primary);
   border-color: var(--accent-green);

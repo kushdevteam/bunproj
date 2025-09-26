@@ -110,35 +110,10 @@ impl Database {
         plans.get(id).cloned()
     }
 
-    fn generate_wallets(&self, launch_plan_id: String, count: i32) -> Result<Vec<Value>, String> {
-        let mut wallets = self.wallets.lock().unwrap();
-        let mut generated = Vec::new();
-        let now = chrono::Utc::now().to_rfc3339();
-
-        for i in 0..count {
-            let wallet_id = format!("wallet_{}_{}", launch_plan_id, i);
-            let address = format!("0x{:040x}", i + 1);
-            let private_key = format!("0x{:064x}", (i as u64) * 12345 + 67890);
-            let wallet_type = if i % 4 == 0 { "aged" } else { "fresh" };
-            
-            let wallet = json!({
-                "id": wallet_id.clone(),
-                "launch_plan_id": launch_plan_id,
-                "address": address,
-                "private_key": private_key,
-                "buy_percentage": 1.0 / count as f64,
-                "funded": false,
-                "balance": 0.0,
-                "wallet_type": wallet_type,
-                "status": "active",
-                "created_at": now.clone()
-            });
-
-            wallets.insert(wallet_id, wallet.clone());
-            generated.push(wallet);
-        }
-
-        Ok(generated)
+    /// SECURITY FIX: Backend wallet generation completely disabled
+    /// Private keys must NEVER be generated on the backend for security reasons
+    fn generate_wallets(&self, _launch_plan_id: String, _count: i32) -> Result<Vec<Value>, String> {
+        Err("SECURITY ERROR: Backend wallet generation permanently disabled for security. Use client-side generation only.".to_string())
     }
 
     fn get_wallets_by_plan(&self, plan_id: &str) -> Vec<Value> {
@@ -506,24 +481,15 @@ fn handle_get_launch_plan(id: &str, db: &Database) -> Response<std::io::Cursor<V
     }
 }
 
-fn handle_generate_wallets(body: &str, db: &Database) -> Response<std::io::Cursor<Vec<u8>>> {
-    match serde_json::from_str::<Value>(body) {
-        Ok(data) => {
-            let launch_plan_id = data.get("launch_plan_id")
-                .and_then(|v| v.as_str())
-                .unwrap_or("")
-                .to_string();
-            let count = data.get("count")
-                .and_then(|v| v.as_i64())
-                .unwrap_or(5) as i32;
-            
-            match db.generate_wallets(launch_plan_id, count) {
-                Ok(wallets) => success_response(json!(wallets)),
-                Err(e) => error_response(500, &e),
-            }
-        }
-        Err(e) => error_response(400, &format!("Invalid JSON: {}", e)),
-    }
+/// SECURITY FIX: Backend wallet generation endpoint permanently disabled
+/// Returns 403 Forbidden to prevent any wallet generation attempts
+fn handle_generate_wallets(_body: &str, _db: &Database) -> Response<std::io::Cursor<Vec<u8>>> {
+    // Log security warning
+    println!("🚨 SECURITY ALERT: Attempted access to disabled wallet generation endpoint");
+    println!("🔒 SECURITY: This endpoint is permanently disabled for security reasons");
+    
+    // Return 403 Forbidden with security message
+    error_response(403, "SECURITY: Backend wallet generation permanently disabled. This endpoint has been removed for security reasons. Use client-side wallet generation only.")
 }
 
 fn handle_get_wallets_by_plan(plan_id: &str, db: &Database) -> Response<std::io::Cursor<Vec<u8>>> {
@@ -818,10 +784,8 @@ fn handle_request(mut request: Request, db: &Database) {
         }
         
         (&Method::Post, "/api/wallets/generate") => {
-            match request_body {
-                Ok(body) => handle_generate_wallets(&body, db),
-                Err(_) => error_response(400, "Request body is required")
-            }
+            // SECURITY: Wallet generation disabled for production security
+            error_response(403, "Wallet generation disabled: All wallet generation must be performed client-side for security reasons")
         }
         (&Method::Get, path) if path.starts_with("/api/wallets/") => {
             if let Some(plan_id) = extract_path_param(path, "/api/wallets/") {

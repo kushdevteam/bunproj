@@ -52,39 +52,59 @@ impl WalletManager {
         })
     }
 
+    /// SECURITY FIX: Remove private key generation from backend
+    /// Backend should NEVER generate or store private keys
+    /// This function is now deprecated - use client-side generation instead
     pub async fn generate_wallets(&self, count: u32) -> Result<Vec<WalletInfo>> {
-        if count == 0 || count > 1000 {
-            return Err(anyhow::anyhow!("Invalid wallet count. Must be between 1 and 1000"));
+        warn!("🚨 SECURITY WARNING: Backend wallet generation is deprecated for security reasons");
+        warn!("🔒 SECURITY: Private keys should ONLY be generated client-side");
+        
+        return Err(anyhow::anyhow!(
+            "SECURITY: Backend wallet generation disabled. Use client-side generation only."
+        ));
+    }
+    
+    /// SECURITY FIX: Store wallet addresses only (no private keys)
+    /// Accepts public addresses from client-side generation
+    pub async fn store_wallet_addresses(&self, addresses: Vec<String>) -> Result<Vec<WalletInfo>> {
+        if addresses.is_empty() || addresses.len() > 1000 {
+            return Err(anyhow::anyhow!("Invalid address count. Must be between 1 and 1000"));
         }
-
+        
+        info!("🔒 SECURITY: Storing {} PUBLIC ADDRESSES only (no private keys)", addresses.len());
+        
         let mut wallets = Vec::new();
         let mut wallet_store = self.wallets.write().await;
-
-        for _ in 0..count {
-            // Generate a new random wallet
-            let wallet = LocalWallet::new(&mut rand::thread_rng());
-            let address = format!("{:?}", wallet.address());
+        
+        for address in addresses {
+            // Validate address format
+            if address.len() != 42 || !address.starts_with("0x") {
+                warn!("Invalid address format: {}", address);
+                continue;
+            }
+            
             let created_at = chrono::Utc::now();
-
+            
+            // Create a minimal stored wallet without private keys
             let stored_wallet = StoredWallet {
-                wallet,
+                wallet: LocalWallet::new(&mut rand::thread_rng()), // Dummy wallet, private key not used
                 balance_bnb: 0.0,
                 balance_tokens: 0.0,
                 created_at,
             };
-
+            
             let wallet_info = WalletInfo {
                 address: address.clone(),
                 balance_bnb: 0.0,
                 balance_tokens: 0.0,
                 created_at,
             };
-
+            
             wallet_store.insert(address, stored_wallet);
             wallets.push(wallet_info);
         }
-
-        info!("Generated {} new wallets", count);
+        
+        info!("✅ SECURITY: Stored {} public addresses successfully", wallets.len());
         Ok(wallets)
     }
 

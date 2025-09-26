@@ -6,6 +6,7 @@
 import { ethers } from 'ethers';
 import { bscRpcClient } from './bsc-rpc';
 import { config } from '../config/env';
+import { validatePrivateKey } from '../utils/crypto';
 
 // Four.meme API endpoints
 const FOURMEME_API_BASE = 'https://four.meme/meme-api';
@@ -138,8 +139,18 @@ class FourMemeClient {
 
       const result: FourMemeNonceResponse = await response.json();
       
+      console.log('Nonce API Response:', {
+        code: result.code,
+        data: result.data,
+        fullResponse: result
+      });
+      
       if (result.code !== '0') {
         throw new Error(`Four.meme API error: ${result.code}`);
+      }
+
+      if (!result.data) {
+        throw new Error('Four.meme API returned empty nonce data');
       }
 
       return result.data;
@@ -154,8 +165,11 @@ class FourMemeClient {
    */
   async login(walletPrivateKey: string): Promise<string> {
     try {
+      // Validate and format private key
+      const validatedPrivateKey = validatePrivateKey(walletPrivateKey);
+      
       // Create wallet instance
-      const wallet = new ethers.Wallet(walletPrivateKey);
+      const wallet = new ethers.Wallet(validatedPrivateKey);
       const walletAddress = wallet.address;
 
       console.log(`Authenticating with four.meme using wallet: ${walletAddress}`);
@@ -362,9 +376,12 @@ class FourMemeClient {
       const network = bscRpcClient.getCurrentNetwork();
       console.log(`Deploying on network: ${network.displayName}`);
 
+      // Validate and format private key
+      const validatedPrivateKey = validatePrivateKey(walletPrivateKey);
+
       // Create wallet instance with QuickNode provider
       const provider = new ethers.JsonRpcProvider(config.networks['bsc-testnet'].rpcUrl);
-      const wallet = new ethers.Wallet(walletPrivateKey, provider);
+      const wallet = new ethers.Wallet(validatedPrivateKey, provider);
 
       console.log(`Deploying from wallet: ${wallet.address}`);
 

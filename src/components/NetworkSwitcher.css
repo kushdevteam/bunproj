@@ -353,6 +353,15 @@
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-height: 36px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="4" height="5" viewBox="0 0 4 5"><path fill="%23fff" d="m0 1 2 2 2-2z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 12px;
+  padding-right: 32px;
 }
 
 .network-select:focus {
@@ -431,10 +440,97 @@
   
   .network-option {
     padding: 12px;
+    min-height: 48px; /* Better touch targets */
   }
   
   .network-option-name {
     font-size: 14px;
+  }
+  
+  /* Enhanced compact mode for mobile */
+  .network-switcher.compact {
+    width: 100%;
+    max-width: 180px;
+  }
+  
+  .network-switcher.compact .network-select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 13px;
+    min-height: 40px; /* Better touch target */
+  }
+  
+  .network-switcher.compact .network-indicator {
+    padding: 10px 12px;
+    min-height: 40px;
+    align-items: center;
+  }
+  
+  .network-switcher.compact .network-name {
+    font-size: 13px;
+  }
+}
+
+/* Additional mobile breakpoint for very small screens */
+@media (max-width: 480px) {
+  .network-status-card {
+    padding: 12px;
+    margin: 8px 0;
+  }
+  
+  .network-header {
+    gap: 8px;
+  }
+  
+  .network-name {
+    font-size: 16px;
+  }
+  
+  .network-stats {
+    gap: 8px;
+  }
+  
+  .stat-item {
+    padding: 6px 10px;
+  }
+  
+  .network-option {
+    padding: 10px;
+    min-height: 44px;
+  }
+  
+  .network-option-name {
+    font-size: 13px;
+  }
+  
+  .network-option-type {
+    font-size: 11px;
+  }
+  
+  /* Compact mode optimizations for very small screens */
+  .network-switcher.compact {
+    max-width: 160px;
+  }
+  
+  .network-switcher.compact .network-select {
+    padding: 8px 10px;
+    font-size: 12px;
+    min-height: 36px;
+  }
+  
+  .network-switcher.compact .network-indicator {
+    padding: 8px 10px;
+    min-height: 36px;
+  }
+  
+  .network-switcher.compact .network-name {
+    font-size: 12px;
+  }
+  
+  .refresh-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+    min-height: 32px;
   }
 }
 

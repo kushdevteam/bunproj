@@ -11,6 +11,7 @@
 
 import { config } from '../config/env';
 import type { EncryptionResult, DecryptionParams } from '../types';
+import { Wallet } from 'ethers';
 
 /**
  * Generate cryptographically secure random bytes
@@ -174,6 +175,33 @@ export const encryptPrivateKey = async (
 };
 
 /**
+ * Validate and format a private key for ethers.js
+ */
+export const validatePrivateKey = (privateKey: string): string => {
+  if (!privateKey || typeof privateKey !== 'string') {
+    throw new Error('Private key is required and must be a string');
+  }
+  
+  // Remove whitespace
+  const cleanKey = privateKey.trim();
+  
+  // Ensure it has 0x prefix
+  let formattedKey = cleanKey.startsWith('0x') ? cleanKey : `0x${cleanKey}`;
+  
+  // Validate length (64 characters + 0x prefix)
+  if (formattedKey.length !== 66) {
+    throw new Error(`Invalid private key length: expected 66 characters (including 0x), got ${formattedKey.length}`);
+  }
+  
+  // Validate hex format
+  if (!/^0x[0-9a-fA-F]{64}$/.test(formattedKey)) {
+    throw new Error('Private key must be a valid hex string');
+  }
+  
+  return formattedKey;
+};
+
+/**
  * Decrypt a private key from secure storage
  */
 export const decryptPrivateKey = async (
@@ -203,12 +231,15 @@ export const decryptPrivateKey = async (
     // Extract encrypted data
     const encrypted = combined.slice(offset).buffer;
     
-    return await decryptData({
+    const decryptedKey = await decryptData({
       encrypted,
       iv,
       salt,
       passphrase,
     });
+    
+    // Validate and format the decrypted private key
+    return validatePrivateKey(decryptedKey);
   } catch (error) {
     throw new Error(`Failed to decrypt private key: ${error instanceof Error ? error.message : 'Invalid data format'}`);
   }
@@ -385,6 +416,74 @@ export const hashPassphrase = async (passphrase: string): Promise<string> => {
   return Array.from(hashArray)
     .map(byte => byte.toString(16).padStart(2, '0'))
     .join('');
+};
+
+// ========================================================================
+// SECURE CLIENT-SIDE WALLET GENERATION
+// ========================================================================
+
+/**
+ * Generate a cryptographically secure wallet client-side using ethers
+ * SECURITY: Private keys NEVER leave the client
+ */
+export const generateSecureWallet = (): { address: string; privateKey: string } => {
+  try {
+    // Generate wallet using ethers with cryptographically secure randomness
+    const wallet = Wallet.createRandom();
+    
+    return {
+      address: wallet.address,
+      privateKey: wallet.privateKey
+    };
+  } catch (error) {
+    throw new Error(`Failed to generate secure wallet: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
+/**
+ * Generate multiple secure wallets with proper buy percentages
+ * SECURITY: All generation happens client-side only
+ */
+export const generateSecureWallets = (
+  count: number, 
+  supplyBuyPercent: number = 0
+): Array<{
+  id: string;
+  address: string;
+  privateKey: string;
+  buyPercentage: number;
+  funded: boolean;
+  balance: number;
+  type: 'fresh' | 'aged';
+  createdAt: string;
+}> => {
+  if (count <= 0 || count > 100) {
+    throw new Error('Wallet count must be between 1 and 100');
+  }
+
+  const wallets = [];
+  const totalBuyPercent = supplyBuyPercent;
+  
+  for (let i = 0; i < count; i++) {
+    // Generate secure wallet
+    const { address, privateKey } = generateSecureWallet();
+    
+    // Calculate buy percentage per wallet (distribute evenly)
+    const buyPercentage = count > 0 ? totalBuyPercent / count : 0;
+    
+    wallets.push({
+      id: generateSessionId(),
+      address,
+      privateKey,
+      buyPercentage: Math.round(buyPercentage * 100) / 100, // Round to 2 decimals
+      funded: false,
+      balance: 0,
+      type: Math.random() > 0.7 ? 'aged' : 'fresh' as 'fresh' | 'aged', // 30% aged, 70% fresh
+      createdAt: new Date().toISOString(),
+    });
+  }
+  
+  return wallets;
 };
 
 /**
@@ -663,3 +762,17 @@ export const decryptWithSessionKey = async (
     return null;
   }
 };
+
+// ========================================================================
+// ENCRYPTED KEY VAULT EXPORTS
+// ========================================================================
+
+export {
+  getKeyVault,
+  vaultStoreKey,
+  vaultRetrieveKey,
+  vaultRemoveKey,
+  vaultPurgeSession,
+  vaultPurgeExpired,
+  vaultClear
+} from './encrypted-vault';

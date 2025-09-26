@@ -1,8 +1,8 @@
-modules = ["rust-stable", "c-clang14", "web", "nodejs-20", "python-3.11"]
+modules = ["rust-stable", "c-clang14", "web", "nodejs-20"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["openssl", "pkg-config"]
+packages = ["openssl", "pkg-config", "solc"]
 
 [workflows]
 runButton = "Project"
@@ -49,6 +49,10 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
+localPort = 5001
+externalPort = 3003
+
+[[ports]]
 localPort = 8000
 externalPort = 8000
 
@@ -60,10 +64,14 @@ externalPort = 3000
 localPort = 40007
 externalPort = 3001
 
+[[ports]]
+localPort = 46281
+externalPort = 3002
+
 [agent]
 expertMode = true
 
 [deployment]
 deploymentTarget = "vm"
-run = ["bash", "-c", "cd backend && cargo run --release & npm start"]
-build = ["bash", "-c", "cd backend && cargo build --release && npm run build"]
+run = ["bash", "-c", "cd simple_backend && cargo run & npx serve -s build -l 5000 --cors"]
+build = ["npm", "run", "build"]
