@@ -1,0 +1,197 @@
+🧩 Objective
+
+Replicate the functionality of a multi-wallet token launcher/seller originally built for Solana, now on Binance Smart Chain (EVM), using a Rust-based full-stack framework.
+
+This includes:
+
+Managing multiple EVM wallets (with private keys)
+
+Distributing BNB to them from a funding wallet
+
+Executing token buys via PancakeSwap per wallet
+
+Optional auto-sell system
+
+Frontend built with Rust (Yew/Leptos), backend in Rust (Actix/Axum)
+
+⚙️ Stack Requirements
+
+Frontend: Leptos or Yew (Rust, WebAssembly)
+
+Backend: Axum or Actix-web
+
+EVM Integration: ethers-rs crate for wallet & transaction management
+
+DEX Integration: PancakeSwap Router ABI with ethers-rs
+
+Build Tooling: Trunk, Cargo, wasm-bindgen
+
+Wallet Key Handling: Use secure in-browser memory only (via WASM bindings)
+
+🔧 Modules to Build
+1. 🔐 Wallet Manager (Rust WASM / Frontend)
+
+Create a table-based UI showing:
+
+Wallet address (shortened)
+
+Private key (toggle visibility securely in WASM memory)
+
+BNB balance
+
+Token balance
+
+Role label (dev, funder, mev, etc.)
+
+Allow actions per wallet:
+
+Buy (token)
+
+Sell
+
+Withdraw
+
+Delete
+
+🧠 Store private keys in browser memory only (via WASM), never persist to server.
+
+2. 💰 Funding Wallet Distribution
+
+From a master funding wallet:
+
+Distribute BNB across all wallets based on % allocation
+
+Use ethers-rs to sign/send multiple BNB transfers
+
+Mark each wallet as "Funded ✅" or "Failed ❌"
+
+Show live balance of the funding wallet
+
+Allow Withdraw BNB back from wallets
+
+3. 🛒 Bundle Launch System (Token Buys)
+
+Form UI inputs:
+
+Token contract address (ERC20)
+
+% allocation per wallet
+
+Slippage tolerance
+
+Priority fee (gas price override)
+
+Optional stealth delay (ms) per tx
+
+On submit:
+
+Loop over wallets
+
+Sign token buy tx using ethers-rs + PancakeSwap Router ABI
+
+Execute with optional stagger
+
+Mark success/failure per wallet
+
+4. 🤖 Auto-Sell Plan (Optional Phase 2)
+
+Define a sell strategy per wallet or token:
+
+Sell if token profit reaches +X%
+
+Use background service to monitor BNB/token value
+
+Trigger auto-sell txs using wallet keys
+
+Could be implemented via a Rust background task, or WebSocket-connected monitoring tool.
+
+5. 🧪 Testing & Simulations
+
+Add Testnet support: allow BSC Testnet toggle
+
+Allow simulation mode: fake balances + tx hashes
+
+Add local wallet generator (in-browser using Rust bindings or imported keys)
+
+📦 Crates You Should Use
+# Ethereum wallet + RPC interactions
+ethers = { version = "2", features = ["abigen", "tokio"] }
+
+# Frontend (choose one)
+leptos = "0.4"
+yew = "0.21"
+
+# Backend framework
+axum = "0.7"  # or actix-web = "4"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+
+🧱 Function Example (BNB Buy via PancakeSwap)
+use ethers::prelude::*;
+
+let router = PancakeRouter::new(router_address, wallet.clone());
+
+let tx = router
+    .swap_exact_eth_for_tokens(
+        min_tokens_out,
+        vec![WETH_ADDRESS, TOKEN_ADDRESS],
+        recipient,
+        deadline,
+    )
+    .value(amount_in_bnb)
+    .send()
+    .await?;
+
+
+You’ll generate the ABI bindings using abigen! macro in ethers.
+
+🖼 UI Components to Match Screenshot
+
+Wallet Table View with:
+
+Role tags (e.g., dev, mev, numbered)
+
+Token Buy % column (editable)
+
+Private key toggle
+
+Status icon (funded ✅, failed ❌)
+
+Funding Panel
+
+Funding wallet address + balance
+
+"Distribute" button
+
+Launch Panel
+
+Inputs: Token address, % per wallet, gas settings
+
+"Launch" button, result tracker
+
+Auto-Sell Panel (optional)
+
+Plan form + list of active plans
+
+✅ Tasks for AI to Start With
+1. Set up Leptos or Yew frontend with routing (pages: /, /bundle, /wallets)
+2. Build Wallet Manager UI with mock data
+3. Integrate ethers-rs on backend to:
+   a. Generate wallets
+   b. Query balances
+   c. Distribute BNB
+4. Implement PancakeSwap buy logic per wallet
+5. Create Launch form → execute batch buy with delays
+6. Wire up BNB testnet and debug transaction sending
+7. Add visual status per wallet
+
+🚨 Notes
+
+You cannot use Solana-specific Rust crates here (like solana-sdk) — replace with ethers-based architecture.
+
+ethers-rs supports both BSC mainnet and testnet.
+
+Use Trunk to bundle the frontend into a WASM app easily.
+
+For real wallets, encourage using imported private keys via secured UI (not hardcoded).
